@@ -1,0 +1,10 @@
+[selene]
+base = "../neovim"
+
+[[assert.args]]
+type = "any"
+
+[[assert.args]]
+type = "string"
+# selene's default (`required = true`) feels somewhat restrictive for testing purpose.
+required = false

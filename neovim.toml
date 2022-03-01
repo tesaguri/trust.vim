@@ -1,0 +1,49 @@
+[selene]
+base = "lua51"
+
+[[vim.fn."*".args]]
+type = "..."
+required = false
+
+[[vim.funcref.args]]
+type = "string"
+
+# Vim-specific globals:
+
+[[vim.command.args]]
+type = "string"
+
+# NeoVim-specific globals:
+
+[[vim.cmd.args]]
+type = "string"
+
+[[vim.deep_equal.args]]
+type = "any"
+
+[[vim.deep_equal.args]]
+type = "any"
+
+[[vim.deepcopy.args]]
+type = "any"
+
+[[vim.gsplit.args]]
+type = "string"
+
+[[vim.gsplit.args]]
+type = "string"
+
+[[vim.gsplit.args]]
+type = "bool"
+
+[[vim.inspect.args]]
+type = "any"
+
+[[vim.lsp.start_client.args]]
+type = "table"
+
+[[vim.tbl_keys.args]]
+type = "table"
+
+[[vim.validate.args]]
+type = "table"
