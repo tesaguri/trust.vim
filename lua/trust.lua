@@ -88,20 +88,28 @@ end
 --- as distrusted) will be trusted.
 ---
 ---@param path string The path to trust.
+---@return boolean The original status value of the node before this function is
+--- called.
 function M.trust(path)
   validate { path = { path, "string" } }
-  dig(path)["/trust"] = true
+  local node = dig(path)
+  local original = node["/trust"]
+  node["/trust"] = true
+  return original
 end
 
 --- Removes the marker of trust of a path if it has been marked with
 --- |trust()|.
 ---
 ---@param path string The path to unmark.
+---@return
 function M.untrust(path)
   validate { path = { path, "string" } }
   local node = get_node(path)
-  if node and node["/trust"] then
+  local original = node and node["/trust"]
+  if original then
     node["/trust"] = nil
+    return original
   end
 end
 
@@ -113,7 +121,10 @@ end
 ---@param path string The path to distrust.
 function M.distrust(path)
   validate { path = { path, "string" } }
-  dig(path)["/trust"] = false
+  local node = dig(path)
+  local original = node["/trust"]
+  node["/trust"] = false
+  return original
 end
 
 --- Removes the marker of distrust of a path if it has been marked with
@@ -123,18 +134,23 @@ end
 function M.undistrust(path)
   validate { path = { path, "string" } }
   local node = get_node(path)
-  if node and node["/trust"] == false then
+  local original = node and node["/trust"]
+  if original == false then
     node["/trust"] = nil
   end
+  return original
 end
 
 --- Sets the raw trust status of a path.
 function M.set(path, status)
   validate { path = { path, "string" }, status = { status, "boolean", true } }
   if status == nil then
-    M.remove(path)
+    return M.remove(path)
   else
-    dig(path)["/trust"] = status
+    local node = dig(path)
+    local original = node["/trust"]
+    node["/trust"] = status
+    return original
   end
 end
 
@@ -146,7 +162,9 @@ function M.remove(path)
   validate { path = { path, "string" } }
   local node = get_node(path)
   if node then
+    local original = node["/trust"]
     node["/trust"] = nil
+    return original
   end
 end
 
