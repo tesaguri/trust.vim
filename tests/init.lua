@@ -34,6 +34,6 @@ local s, e = pcall(function()
   end
 end)
 if not s then
-  print(e)
-  os.exit(1)
+  print(inspect(e) .. "\n")
+  cmd("cquit")
 end

@@ -1,6 +1,6 @@
 test:
+	nvim --headless -u NONE +'luafile tests/init.lua' +q
 	vim -u NONE +'luafile tests/init.lua' +q
-	nvim --headless -u NORC +'luafile tests/init.lua' +q
 
 lint:
 	stylua --check .
