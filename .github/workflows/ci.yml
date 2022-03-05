@@ -47,7 +47,11 @@ jobs:
         version:
           - stable
         include:
-          - vim: nvim
+          - os: ubuntu-latest
+            vim: nvim
+            version: nightly
+          - os: windows-latest
+            vim: nvim
             version: nightly
     continue-on-error: ${{ matrix.version == 'nightly' }}
     steps:
