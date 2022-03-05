@@ -37,19 +37,13 @@ lsp.safe_servers.another_ls = false
 assert_eq(lsp.safe_servers.another_ls, false)
 
 -- Should refuse to set other values:
-assert_eq(
-  pcall(function()
-    lsp.safe_servers.another_ls = 1
-  end),
-  false
-)
+assert(not pcall(function()
+  lsp.safe_servers.another_ls = 1
+end))
 assert_eq(lsp.safe_servers.another_ls, false)
-assert_eq(
-  pcall(function()
-    lsp.safe_servers = { 1 }
-  end),
-  false
-)
+assert(not pcall(function()
+  lsp.safe_servers = { 1 }
+end))
 assert_eq(lsp.safe_servers.another_ls, false)
 
 -- Shold be unable to inspect the table directly:
@@ -62,10 +56,7 @@ assert_eq(iter(), nil)
 assert(vim.deep_equal(lsp.safe_servers_array(), { "safe_ls" }))
 
 -- Should refuse to set `last_root_dir`:
-assert_eq(
-  pcall(function()
-    lsp.last_root_dir = "/some/random/path"
-  end),
-  false
-)
+assert(not pcall(function()
+  lsp.last_root_dir = "/some/random/path"
+end))
 assert(lsp.last_root_dir ~= "/some/random/path")
