@@ -49,7 +49,12 @@ function M.hook_start_client()
   end
 
   local function start_client(config)
-    local root_dir = config.root_dir
+    -- `lspconfig` sets `root_dir` to `nil` in single file mode.
+    -- Fall back to `cmd_cwd` in that case.
+    local root_dir = config.root_dir or config.cmd_cwd
+    if not root_dir then
+      return
+    end
     last_root_dir = root_dir
     if rawget(safe_servers, config.name) or trust.is_trusted(root_dir) then
       return old(config)
