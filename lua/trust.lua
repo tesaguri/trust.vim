@@ -131,22 +131,6 @@ function M.trust(path)
   return original
 end
 
---- Removes the marker of trust of a path if it has been marked with
---- |trust()|.
----
----@param path string The path to unmark.
----@return boolean The original status value of the node before this function is
---- called.
-function M.untrust(path)
-  validate { path = { path, "string" } }
-  local node = get_node(path)
-  local original = node and node[trust_key]
-  if original then
-    node[trust_key] = nil
-    return original
-  end
-end
-
 --- Marks a path as distrusted.
 ---
 --- Workspaces at the path or its descendants (up to a path explicitly marked
@@ -160,22 +144,6 @@ function M.distrust(path)
   local node = dig(path)
   local original = node[trust_key]
   node[trust_key] = false
-  return original
-end
-
---- Removes the marker of distrust of a path if it has been marked with
---- |distrust()|.
----
----@param path string The path to unmark.
----@return boolean The original status value of the node before this function is
---- called.
-function M.undistrust(path)
-  validate { path = { path, "string" } }
-  local node = get_node(path)
-  local original = node and node[trust_key]
-  if original == false then
-    node[trust_key] = nil
-  end
   return original
 end
 

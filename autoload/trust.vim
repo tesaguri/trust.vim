@@ -2,16 +2,8 @@ function trust#trust(path)
   return luaeval('require("trust").trust(_A)', a:path)
 endfunction
 
-function trust#untrust(path)
-  return luaeval('require("trust").untrust(_A)', a:path)
-endfunction
-
 function trust#distrust(path)
   return luaeval('require("trust").distrust(_A)', a:path)
-endfunction
-
-function trust#undistrust(path)
-  return luaeval('require("trust").undistrust(_A)', a:path)
 endfunction
 
 function trust#set(path, status)

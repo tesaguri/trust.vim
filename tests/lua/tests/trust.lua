@@ -27,20 +27,6 @@ assert_eq(w, resolve(root .. path { "home", "me", "workspace", "forks" }))
 assert_eq(s, false)
 assert_eq(ws(), nil)
 
--- Should be no-op:
-trust.undistrust(root .. path { "home", "me" })
-trust.untrust(root .. path { "home", "me", "workspace", "forks" })
-
-assert_eq(trust.get(resolve(root .. path { "home", "me" })), true)
-assert_eq(
-  trust.get(resolve(root .. path { "home", "me", "workspace", "forks" })),
-  false
-)
-
-trust.untrust(root .. path { "home", "me" })
-trust.undistrust(root .. path { "home", "me", "workspace", "forks" })
-assert_eq(trust.workspaces()(), nil)
-
 trust.clear()
 
 trust.trust("")

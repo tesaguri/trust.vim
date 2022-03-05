@@ -32,23 +32,6 @@ endfunction
 
 command -nargs=+ -complete=dir Trust call s:Trust(<f-args>)
 
-function s:Untrust(path, ...)
-  let l:path = expand(a:path)
-  let l:nr = trust#untrust(l:path)
-  if a:0 == 0
-    if !l:nr
-      echomsg 'Path is not trusted, nothing to do'
-    endif
-  else
-    for l:path in a:000
-      let l:nr = l:nr + trust#untrust(expand(l:path))
-    endfor
-    call s:Echo([['Untrusted '], [string(l:nr), 'Number'], [' paths']], 1, {})
-  endif
-endfunction
-
-command -nargs=+ -complete=dir Untrust call s:Untrust(<f-args>)
-
 function s:Distrust(path, ...)
   call trust#distrust(a:path)
   if a:0 > 0
@@ -63,21 +46,14 @@ endfunction
 
 command -nargs=+ -complete=dir Distrust call s:Distrust(<f-args>)
 
-function s:Undistrust(path, ...)
-  let l:nr = trust#undistrust(a:path) == v:false
-  if a:0 == 0
-    if !l:nr
-      echomsg 'Path is not distrusted, nothing to do'
-    endif
-  else
-    for l:path in a:000
-      let l:nr = l:nr + trust#undistrust(a:path) == v:false
-    endfor
-    call s:Echo([['Undistrusted '], [string(l:nr)], [' paths']], 1, {})
-  endif
+function s:TrustRemove(path, ...)
+  call trust#remove(expand(a:path))
+  for l:path in a:000
+    trust#remove(l:path)
+  endfor
 endfunction
 
-command -nargs=+ -complete=dir Undistrust call s:Undistrust(<f-args>)
+command -nargs=+ -complete=dir TrustRemove call s:TrustRemove(<f-args>)
 
 command TrustLoad lua require("trust").load_state()
 
