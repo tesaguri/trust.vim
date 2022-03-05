@@ -19,24 +19,24 @@ else
   endfunction
 end
 
-function s:Trust(path, ...)
+function s:TrustAllow(path, ...)
   let l:path = expand(a:path)
-  call trust#trust(l:path)
+  call trust#allow(l:path)
   if a:0 > 0
     for l:path in a:000
-      call trust#trust(expand(l:path))
+      call trust#allow(expand(l:path))
     endfor
     call s:Echo([['Trusted '], [string(a:0 + 1), 'Number'], [' paths']], 1, {})
   endif
 endfunction
 
-command -nargs=+ -complete=dir Trust call s:Trust(<f-args>)
+command -nargs=+ -complete=dir TrustAllow call s:TrustAllow(<f-args>)
 
-function s:Distrust(path, ...)
-  call trust#distrust(a:path)
+function s:TrustDeny(path, ...)
+  call trust#deny(a:path)
   if a:0 > 0
     for l:path in a:000
-      trust#distrust(l:path)
+      trust#deny(l:path)
     endfor
     call s:Echo(
       \[['Distrusted '], [string(a:0 + 1), 'Number'], [' paths'], 1, {}
@@ -44,7 +44,7 @@ function s:Distrust(path, ...)
   endif
 endfunction
 
-command -nargs=+ -complete=dir Distrust call s:Distrust(<f-args>)
+command -nargs=+ -complete=dir TrustDeny call s:TrustDeny(<f-args>)
 
 function s:TrustRemove(path, ...)
   call trust#remove(expand(a:path))
@@ -72,7 +72,7 @@ endfunction
 command TrustList call s:TrustList()
 
 if !luaeval('not vim.lsp')
-  function s:TrustWorkspace()
+  function s:TrustAllowWorkspace()
     let l:workspace = trust#lsp#last_root_dir()
     if l:workspace == v:null
       call s:Echo([['No workspace found', 'ErrorMsg']], 1, {})
@@ -80,12 +80,12 @@ if !luaeval('not vim.lsp')
     endif
     call s:Echo([['Workspace is '], [l:workspace, 'Directory']], 1, {})
     if confirm('Trust the workspace?', "&Yes\n&No", 2, 'Question') == 1
-      call trust#trust(l:workspace)
+      call trust#allow(l:workspace)
       call s:Echo(
         \[['Trusted workspace: '], [l:workspace, 'Directory']], 1, {},
       \)
     endif
   endfunction
 
-  command TrustWorkspace call s:TrustWorkspace()
+  command TrustAllowWorkspace call s:TrustAllowWorkspace()
 endif

@@ -1,9 +1,9 @@
-function trust#trust(path)
-  return luaeval('require("trust").trust(_A)', a:path)
+function trust#allow(path)
+  return luaeval('require("trust").allow(_A)', a:path)
 endfunction
 
-function trust#distrust(path)
-  return luaeval('require("trust").distrust(_A)', a:path)
+function trust#deny(path)
+  return luaeval('require("trust").deny(_A)', a:path)
 endfunction
 
 function trust#set(path, status)
@@ -34,8 +34,8 @@ function trust#save_state(base_path = v:null)
   return luaeval('require("trust").save_state(_A)', a:base_path)
 endfunction
 
-function trust#is_trusted(path)
-  return luaeval('require("trust").is_trusted(_A)', a:path)
+function trust#is_allowed(path)
+  return luaeval('require("trust").is_allowed(_A)', a:path)
 endfunction
 
 function trust#get(path)

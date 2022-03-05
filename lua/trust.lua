@@ -123,7 +123,7 @@ end
 ---@param path string The path to trust.
 ---@return boolean The original status value of the node before this function is
 --- called.
-function M.trust(path)
+function M.allow(path)
   validate { path = { path, "string" } }
   local node = dig(path)
   local original = node[trust_key]
@@ -139,7 +139,7 @@ end
 ---@param path string The path to distrust.
 ---@return boolean The original status value of the node before this function is
 --- called.
-function M.distrust(path)
+function M.deny(path)
   validate { path = { path, "string" } }
   local node = dig(path)
   local original = node[trust_key]
@@ -167,7 +167,7 @@ function M.set(path, status)
 end
 
 --- Removes the marker of (dis)trust of a path if it has been marked with
---- |trust()| or |distrust()|.
+--- |allow()| or |deny()|.
 ---
 ---@param path string The path to unmark.
 function M.remove(path)
@@ -199,10 +199,10 @@ local function file_paths(base_path)
   base_path = base_path or default_base()
 
   if type(base_path) == "string" then
-    return base_path .. sep .. "trust.txt", base_path .. sep .. "distrust.txt"
+    return base_path .. sep .. "allow.txt", base_path .. sep .. "deny.txt"
   elseif type(base_path) == "table" then
-    return base_path.trust or default_base() .. sep .. "trust.txt",
-      base_path.distrust or default_base() .. sep .. "distrust.txt"
+    return base_path.allow or default_base() .. sep .. "allow.txt",
+      base_path.deny or default_base() .. sep .. "deny.txt"
   end
 end
 
@@ -240,35 +240,35 @@ end
 --- Overwrites the on-memory trust statuses.
 ---
 ---@param base_path string|table|nil String of the path to a directory
---- containing the status files or a table with `trust` and `distrust` keys each
---- of whose value is a file object or a string of the path to a status file.
+--- containing the status files or a table with `allow` and `deny` keys, each of
+--- whose value is a file object or a string of the path to a status file.
 --- Defaults to `stdpath("data")."/trust"` (requires NeoVim).
 function M.load_state(base_path)
-  local trust_list, distrust_list = file_paths(base_path)
-  local trust_is_path = io.type(trust_list) == nil
-  local distrust_is_path = io.type(distrust_list) == nil
+  local allowlist, denylist = file_paths(base_path)
+  local al_is_path = io.type(allowlist) == nil
+  local dl_is_path = io.type(denylist) == nil
 
-  if not io.type(trust_list) then
-    trust_list = assert(open_ignore_non_existent(trust_list))
+  if not io.type(allowlist) then
+    allowlist = assert(open_ignore_non_existent(allowlist))
   end
-  if not io.type(distrust_list) then
-    distrust_list = assert(open_ignore_non_existent(distrust_list))
+  if not io.type(denylist) then
+    denylist = assert(open_ignore_non_existent(denylist))
   end
 
   local new_tree = {}
 
-  for path in trust_list:lines() do
+  for path in allowlist:lines() do
     dig(path, new_tree)[trust_key] = true
   end
-  if trust_is_path then
-    assert(trust_list:close())
+  if al_is_path then
+    assert(allowlist:close())
   end
 
-  for path in distrust_list:lines() do
+  for path in denylist:lines() do
     dig(path, new_tree)[trust_key] = false
   end
-  if distrust_is_path then
-    assert(distrust_list:close())
+  if dl_is_path then
+    assert(denylist:close())
   end
 
   tree = new_tree
@@ -279,48 +279,48 @@ end
 --- Saves the on-memory trust statuses into files.
 ---
 ---@param base_path string|table|nil String of the path to a directory to save
---- the status files in or a table with `trust` and `distrust` keys each of
---- whose value is a file object or a string of the path to save the status
---- file. Defaults to `stdpath("data")."/trust"` (requires NeoVim).
+--- the status files in or a table with `allow` and `deny` keys, each of whose
+--- value is a file object or a string of the path to save the status file.
+--- Defaults to `stdpath("data")."/trust"` (requires NeoVim).
 function M.save_state(base_path)
-  local trust_list, distrust_list = file_paths(base_path)
-  local trust_is_path = io.type(trust_list) == nil
-  local distrust_is_path = io.type(distrust_list) == nil
+  local allowlist, denylist = file_paths(base_path)
+  local al_is_path = io.type(allowlist) == nil
+  local dl_is_path = io.type(denylist) == nil
 
   if type(base_path) == "string" then
     mkdir(base_path, "p")
   end
-  if trust_is_path then
-    trust_list = assert(io.open(trust_list, "w"))
-    trust_list:setvbuf("full")
+  if al_is_path then
+    allowlist = assert(io.open(allowlist, "w"))
+    allowlist:setvbuf("full")
   end
-  if distrust_is_path then
-    distrust_list = assert(io.open(distrust_list, "w"))
-    distrust_list:setvbuf("full")
+  if dl_is_path then
+    denylist = assert(io.open(denylist, "w"))
+    denylist:setvbuf("full")
   end
 
   for path, trust in M.workspaces() do
     if trust then
-      assert(trust_list:write(path))
+      assert(allowlist:write(path))
       -- Using LF as delimiter, which is most easily splittable with Lua's `io`
       -- module, although it is also a valid file name character (NUL would be
       -- ideal in that regard?).
-      assert(trust_list:write("\n"))
+      assert(allowlist:write("\n"))
     else
-      assert(distrust_list:write(path))
-      assert(distrust_list:write("\n"))
+      assert(denylist:write(path))
+      assert(denylist:write("\n"))
     end
   end
 
-  if trust_is_path then
-    assert(trust_list:close())
+  if al_is_path then
+    assert(allowlist:close())
   else
-    assert(trust_list:flush())
+    assert(allowlist:flush())
   end
-  if distrust_is_path then
-    assert(distrust_list:close())
+  if dl_is_path then
+    assert(denylist:close())
   else
-    assert(distrust_list:flush())
+    assert(denylist:flush())
   end
 
   return true
@@ -332,7 +332,7 @@ end
 ---
 ---@param path string Path to a workspace.
 ---@return boolean `true` if the path is trusted, `false` otherwise.
-function M.is_trusted(path)
+function M.is_allowed(path)
   validate { path = { path, "string" } }
 
   local node = tree
@@ -356,7 +356,7 @@ end
 
 --- Returns the raw trust status of a path.
 ---
---- Unlike |is_trusted()|, this does not respect the trust status of ancestor
+--- Unlike |is_allowed()|, this does not respect the trust status of ancestor
 --- paths.
 ---
 ---@return boolean|nil `true` if the path is explicitly marked as trusted,

@@ -20,7 +20,7 @@ assert(not vim.lsp.start_client {
 })
 assert_eq(lsp.last_root_dir, root .. path { "some", "path" })
 
-trust.trust(root .. "some")
+trust.allow(root .. "some")
 assert(vim.lsp.start_client {
   name = "foo",
   root_dir = root .. path { "some", "path" },

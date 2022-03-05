@@ -56,7 +56,7 @@ function M.hook_start_client()
       return
     end
     last_root_dir = root_dir
-    if rawget(safe_servers, config.name) or trust.is_trusted(root_dir) then
+    if rawget(safe_servers, config.name) or trust.is_allowed(root_dir) then
       return old(config)
     end
   end
