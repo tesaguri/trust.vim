@@ -14,15 +14,24 @@ end
 lsp.hook_start_client()
 
 -- Should block every call by default:
-assert(not vim.lsp.start_client { name = "foo", root_dir = "/some/path" })
-assert_eq(lsp.last_root_dir, "/some/path")
+assert(not vim.lsp.start_client {
+  name = "foo",
+  root_dir = root .. path { "some", "path" },
+})
+assert_eq(lsp.last_root_dir, root .. path { "some", "path" })
 
-trust.trust("/some")
-assert(vim.lsp.start_client { name = "foo", root_dir = "/some/path" })
+trust.trust(root .. "some")
+assert(vim.lsp.start_client {
+  name = "foo",
+  root_dir = root .. path { "some", "path" },
+})
 
 lsp.safe_servers = { "safe_ls" }
-assert(vim.lsp.start_client { name = "safe_ls", root_dir = "/another/path" })
-assert_eq(lsp.last_root_dir, "/another/path")
+assert(vim.lsp.start_client {
+  name = "safe_ls",
+  root_dir = root .. path { "another", "path" },
+})
+assert_eq(lsp.last_root_dir, root .. path { "another", "path" })
 
 -- Test metatable behaviors:
 
@@ -57,6 +66,6 @@ assert(vim.deep_equal(lsp.safe_servers_array(), { "safe_ls" }))
 
 -- Should refuse to set `last_root_dir`:
 assert(not pcall(function()
-  lsp.last_root_dir = "/some/random/path"
+  lsp.last_root_dir = root .. "some-random-path"
 end))
-assert(lsp.last_root_dir ~= "/some/random/path")
+assert(lsp.last_root_dir ~= root .. "some-random-path")

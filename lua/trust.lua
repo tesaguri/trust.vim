@@ -41,15 +41,48 @@ end
 
 -- Common utilities:
 
+local sep
+local use_drive_letter
+if has("win32") ~= 0 then
+  sep = "\\"
+  use_drive_letter = true
+else
+  sep = "/"
+  use_drive_letter = false
+end
+local trust_key = sep .. "trust"
+
 -- A tree representing the file system and storing trust statuses of workspaces.
 local tree = {}
 
-local function path_components(path)
-  if path:sub(1, 1) ~= "/" then
-    path = getcwd() .. "/" .. path
+local function is_absolute(path)
+  if use_drive_letter then
+    return path:match("^[A-Za-z]:")
+  else
+    return path:sub(1, 1) == sep
   end
-  path = resolve(path):gsub("/+", "/"):gsub("/$", "")
-  return gsplit(string.sub(path, 2), "/", true)
+end
+
+local function path_components(path)
+  if not is_absolute(path) then
+    path = getcwd() .. sep .. path
+  end
+
+  path = resolve(path):gsub(sep .. sep .. "+", sep)
+
+  if path:sub(-1) == sep then
+    -- Remove trailing path separator.
+    path = path:sub(1, -2)
+  end
+
+  if use_drive_letter and path:match("^[a-z]") then
+    path = path:sub(1, 1):upper() .. path:sub(2)
+  else
+    -- Remove leading path separator.
+    path = path:sub(2)
+  end
+
+  return gsplit(path, sep, true)
 end
 
 --- Get the tree node for a path.
@@ -93,8 +126,8 @@ end
 function M.trust(path)
   validate { path = { path, "string" } }
   local node = dig(path)
-  local original = node["/trust"]
-  node["/trust"] = true
+  local original = node[trust_key]
+  node[trust_key] = true
   return original
 end
 
@@ -107,9 +140,9 @@ end
 function M.untrust(path)
   validate { path = { path, "string" } }
   local node = get_node(path)
-  local original = node and node["/trust"]
+  local original = node and node[trust_key]
   if original then
-    node["/trust"] = nil
+    node[trust_key] = nil
     return original
   end
 end
@@ -125,8 +158,8 @@ end
 function M.distrust(path)
   validate { path = { path, "string" } }
   local node = dig(path)
-  local original = node["/trust"]
-  node["/trust"] = false
+  local original = node[trust_key]
+  node[trust_key] = false
   return original
 end
 
@@ -139,9 +172,9 @@ end
 function M.undistrust(path)
   validate { path = { path, "string" } }
   local node = get_node(path)
-  local original = node and node["/trust"]
+  local original = node and node[trust_key]
   if original == false then
-    node["/trust"] = nil
+    node[trust_key] = nil
   end
   return original
 end
@@ -159,8 +192,8 @@ function M.set(path, status)
     return M.remove(path)
   else
     local node = dig(path)
-    local original = node["/trust"]
-    node["/trust"] = status
+    local original = node[trust_key]
+    node[trust_key] = status
     return original
   end
 end
@@ -173,8 +206,8 @@ function M.remove(path)
   validate { path = { path, "string" } }
   local node = get_node(path)
   if node then
-    local original = node["/trust"]
-    node["/trust"] = nil
+    local original = node[trust_key]
+    node[trust_key] = nil
     return original
   end
 end
@@ -190,7 +223,7 @@ local function file_paths(base_path)
   local default
   local function default_base()
     if not default then
-      default = stdpath("data") .. "/trust"
+      default = stdpath("data") .. sep .. "trust"
     end
     return default
   end
@@ -198,10 +231,10 @@ local function file_paths(base_path)
   base_path = base_path or default_base()
 
   if type(base_path) == "string" then
-    return base_path .. "/trust.txt", base_path .. "/distrust.txt"
+    return base_path .. sep .. "trust.txt", base_path .. sep .. "distrust.txt"
   elseif type(base_path) == "table" then
-    return base_path.trust or default_base() .. "/trust.txt",
-      base_path.distrust or default_base() .. "/distrust.txt"
+    return base_path.trust or default_base() .. sep .. "trust.txt",
+      base_path.distrust or default_base() .. sep .. "distrust.txt"
   end
 end
 
@@ -218,12 +251,13 @@ function empty_file.close()
 end
 
 local open_ignore_non_existent
-if has("unix") ~= 0 then
+if has("unix") ~= 0 or has("win32") ~= 0 then
   function open_ignore_non_existent(filename)
     local f, msg, errno = io.open(filename)
     if f then
       return f
-    elseif errno == 2 then -- ENOENT
+    elseif errno == 2 then
+      -- `ENOENT` on Unix and `ERROR_FILE_NOT_FOUND` on Windows
       return empty_file
     else
       return f, msg, errno
@@ -256,14 +290,14 @@ function M.load_state(base_path)
   local new_tree = {}
 
   for path in trust_list:lines() do
-    dig(path, new_tree)["/trust"] = true
+    dig(path, new_tree)[trust_key] = true
   end
   if trust_is_path then
     assert(trust_list:close())
   end
 
   for path in distrust_list:lines() do
-    dig(path, new_tree)["/trust"] = false
+    dig(path, new_tree)[trust_key] = false
   end
   if distrust_is_path then
     assert(distrust_list:close())
@@ -339,9 +373,9 @@ function M.is_trusted(path)
   for comp in path_components(path) do
     node = node[comp]
     if node then
-      if node["/trust"] then
+      if node[trust_key] then
         ret = true
-      elseif node["/trust"] == false then
+      elseif node[trust_key] == false then
         ret = false
       end
     else
@@ -363,19 +397,21 @@ function M.get(path)
   validate { path = { path, "string" } }
   local node = get_node(path)
   if node then
-    return node["/trust"]
+    return node[trust_key]
   end
 end
 
 local function walk(node, path)
-  local trust = node["/trust"]
+  local trust = node[trust_key]
   if trust ~= nil then
-    local key = path == "" and "/" or path
-    coroutine.yield(key, trust)
+    if not (use_drive_letter and path == "") then
+      local key = path == "" and sep or path
+      coroutine.yield(key, trust)
+    end
   end
   for name, child in pairs(node) do
-    if name:sub(1, 1) ~= "/" then
-      local child_path = path .. "/" .. name
+    if name:sub(1, 1) ~= sep then
+      local child_path = path .. sep .. name
       walk(child, child_path)
     end
   end

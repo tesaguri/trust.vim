@@ -9,6 +9,20 @@ resolve = vim.funcref("resolve")
 local cmd = vim.cmd or vim.command
 local has = vim.funcref("has")
 
+if vim.funcref("has")("win32") ~= 0 then
+  root = "C:\\"
+  null = "NUL"
+  function path(comps)
+    return table.concat(comps, "\\")
+  end
+else
+  root = "/"
+  null = "/dev/null"
+  function path(comps)
+    return table.concat(comps, "/")
+  end
+end
+
 function assert_eq(lhs, rhs)
   if lhs ~= rhs then
     error(
