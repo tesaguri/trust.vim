@@ -102,7 +102,8 @@ end
 --- |trust()|.
 ---
 ---@param path string The path to unmark.
----@return
+---@return boolean The original status value of the node before this function is
+--- called.
 function M.untrust(path)
   validate { path = { path, "string" } }
   local node = get_node(path)
@@ -119,6 +120,8 @@ end
 --- as trusted, if any) will be untrusted.
 ---
 ---@param path string The path to distrust.
+---@return boolean The original status value of the node before this function is
+--- called.
 function M.distrust(path)
   validate { path = { path, "string" } }
   local node = dig(path)
@@ -131,6 +134,8 @@ end
 --- |distrust()|.
 ---
 ---@param path string The path to unmark.
+---@return boolean The original status value of the node before this function is
+--- called.
 function M.undistrust(path)
   validate { path = { path, "string" } }
   local node = get_node(path)
@@ -142,6 +147,12 @@ function M.undistrust(path)
 end
 
 --- Sets the raw trust status of a path.
+---
+---@param path string The path to set trust status.
+---@param status boolean|nil Trust status value. `true` to trust, `false` to
+--- distrust, `nil` to unset.
+---@return boolean The original status value of the node before this function is
+--- called.
 function M.set(path, status)
   validate { path = { path, "string" }, status = { status, "boolean", true } }
   if status == nil then
@@ -266,7 +277,7 @@ end
 
 --- Saves the on-memory trust statuses into files.
 ---
----@param base_path string|table|nit String of the path to a directory to save
+---@param base_path string|table|nil String of the path to a directory to save
 --- the status files in or a table with `trust` and `distrust` keys each of
 --- whose value is a file object or a string of the path to save the status
 --- file. Defaults to `stdpath("data")."/trust"` (requires NeoVim).
@@ -318,8 +329,8 @@ end
 
 --- Returns `true` if the path is trusted.
 ---
----@param string Path to a workspace.
----@return `true` if the path is trusted, `false` otherwise.
+---@param path string Path to a workspace.
+---@return boolean `true` if the path is trusted, `false` otherwise.
 function M.is_trusted(path)
   validate { path = { path, "string" } }
 
@@ -377,6 +388,8 @@ end
 ---
 --- If the trust status is modified between the iterator function calls, its
 --- return value is unspecified.
+---
+---@return function An iterator over (dis)trusted paths and their trust status.
 function M.workspaces()
   local node = tree
   return coroutine.wrap(function()
