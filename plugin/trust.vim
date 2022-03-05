@@ -55,9 +55,25 @@ endfunction
 
 command -nargs=+ -complete=dir TrustRemove call s:TrustRemove(<f-args>)
 
-command TrustLoad lua require("trust").load_state()
+function s:ExpandIfAny(path)
+  if a:path
+    return expand(a:path)
+  else
+    return a:path
+  endif
+endfunction
 
-command TrustSave lua require("trust").save_state()
+function s:TrustLoad(base_path = v:null)
+  call trust#load_state(s:ExpandIfAny(a:base_path))
+endfunction
+
+command -nargs=? -complete=dir TrustLoad call s:TrustLoad(<f-args>)
+
+function s:TrustSave(base_path = v:null)
+  call trust#save_state(s:ExpandIfAny(a:base_path))
+endfunction
+
+command -nargs=? -complete=dir TrustSave call s:TrustSave(<f-args>)
 
 function s:TrustList()
   try
