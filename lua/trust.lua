@@ -45,7 +45,7 @@ end
 local tree = {}
 
 local function path_components(path)
-  if path:byte(1) ~= ("/"):byte(1) then
+  if path:sub(1, 1) ~= "/" then
     path = getcwd() .. "/" .. path
   end
   path = resolve(path):gsub("/+", "/"):gsub("/$", "")
@@ -218,7 +218,6 @@ function empty_file.close()
 end
 
 local open_ignore_non_existent
-
 if has("unix") ~= 0 then
   function open_ignore_non_existent(filename)
     local f, msg, errno = io.open(filename)
@@ -375,7 +374,7 @@ local function walk(node, path)
     coroutine.yield(key, trust)
   end
   for name, child in pairs(node) do
-    if name:byte(1) ~= ("/"):byte(1) then
+    if name:sub(1, 1) ~= "/" then
       local child_path = path .. "/" .. name
       walk(child, child_path)
     end
