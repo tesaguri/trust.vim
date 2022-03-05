@@ -26,12 +26,12 @@ function trust#clear()
   return luaeval('require("trust").clear()')
 endfunction
 
-function trust#load_state(base_path = v:null)
-  return luaeval('require("trust").load_state(_A)', a:base_path)
+function trust#load(base_path = v:null)
+  return luaeval('require("trust").load(_A)', a:base_path)
 endfunction
 
-function trust#save_state(base_path = v:null)
-  return luaeval('require("trust").save_state(_A)', a:base_path)
+function trust#save(base_path = v:null)
+  return luaeval('require("trust").save(_A)', a:base_path)
 endfunction
 
 function trust#is_allowed(path)

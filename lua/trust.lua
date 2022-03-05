@@ -243,7 +243,7 @@ end
 --- containing the status files or a table with `allow` and `deny` keys, each of
 --- whose value is a file object or a string of the path to a status file.
 --- Defaults to `stdpath("data")."/trust"` (requires NeoVim).
-function M.load_state(base_path)
+function M.load(base_path)
   local allowlist, denylist = file_paths(base_path)
   local al_is_path = io.type(allowlist) == nil
   local dl_is_path = io.type(denylist) == nil
@@ -282,7 +282,7 @@ end
 --- the status files in or a table with `allow` and `deny` keys, each of whose
 --- value is a file object or a string of the path to save the status file.
 --- Defaults to `stdpath("data")."/trust"` (requires NeoVim).
-function M.save_state(base_path)
+function M.save(base_path)
   local allowlist, denylist = file_paths(base_path)
   local al_is_path = io.type(allowlist) == nil
   local dl_is_path = io.type(denylist) == nil

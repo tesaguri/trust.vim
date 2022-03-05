@@ -32,8 +32,8 @@ trust.clear()
 trust.allow("")
 assert_eq(trust.get(getcwd()), true)
 
--- `load_state` should overwrite current status:
-trust.load_state { allow = null, deny = null }
+-- `load` should overwrite current status:
+trust.load { allow = null, deny = null }
 assert_eq(trust.workspaces()(), nil)
 
 trust.allow(root)
@@ -43,7 +43,7 @@ trust.deny(root .. path { "foo" })
 local tmpname = os.tmpname()
 local tmpfile = io.tmpfile()
 
-trust.save_state { allow = tmpname, deny = tmpfile }
+trust.save { allow = tmpname, deny = tmpfile }
 
 local allowlist = io.open(tmpname)
 assert_eq(allowlist:read("*a"), root .. "\n")
@@ -52,7 +52,7 @@ assert(tmpfile:seek("set", 0))
 assert_eq(tmpfile:read("*a"), root .. path { "foo" } .. "\n")
 assert(tmpfile:seek("set", 0))
 
-trust.load_state { allow = tmpfile, deny = tmpname }
+trust.load { allow = tmpfile, deny = tmpname }
 assert(os.remove(tmpname))
 assert(tmpfile:close())
 

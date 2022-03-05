@@ -64,13 +64,13 @@ function s:ExpandIfAny(path)
 endfunction
 
 function s:TrustLoad(base_path = v:null)
-  call trust#load_state(s:ExpandIfAny(a:base_path))
+  call trust#load(s:ExpandIfAny(a:base_path))
 endfunction
 
 command -nargs=? -complete=dir TrustLoad call s:TrustLoad(<f-args>)
 
 function s:TrustSave(base_path = v:null)
-  call trust#save_state(s:ExpandIfAny(a:base_path))
+  call trust#save(s:ExpandIfAny(a:base_path))
 endfunction
 
 command -nargs=? -complete=dir TrustSave call s:TrustSave(<f-args>)
