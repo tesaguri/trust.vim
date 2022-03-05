@@ -82,7 +82,26 @@ function s:TrustList()
     " NeoVim
     let l:Echo = v:null
   endtry
-  call luaeval('(function() _A = _A or vim.api.nvim_echo local list = vim.list or function(a) return a or {} end for w, s in require("trust").workspaces() do _A(list({ list({ w, "Directory" }), list({ "\t" }), list({ s and "trusted" or "distrusted" }) }), 1, list()) end end)()', l:Echo)
+
+  call luaeval('
+    \(function()
+    \  _A = _A or vim.api.nvim_echo
+    \  local list = vim.list or function(a)
+    \    return a or {}
+    \  end
+    \  for w, s in require("trust").workspaces() do
+    \    _A(
+    \      list {
+    \        list { w, "Directory" },
+    \        list { "\t" },
+    \        list { s and "trusted" or "distrusted" },
+    \      },
+    \      1,
+    \      list()
+    \    )
+    \  end
+    \end)()
+    \', l:Echo)
 endfunction
 
 command TrustList call s:TrustList()
