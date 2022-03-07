@@ -1,3 +1,7 @@
+if not vim.lsp then
+  return true
+end
+
 local trust = require("trust")
 local lsp = require("trust.lsp")
 

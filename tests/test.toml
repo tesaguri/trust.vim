@@ -8,3 +8,9 @@ type = "any"
 type = "string"
 # selene's default (`required = true`) feels somewhat restrictive for testing purpose.
 required = false
+
+[jit.version]
+property = true
+
+[[vim.list.args]]
+type = "table"
