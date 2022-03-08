@@ -29,9 +29,9 @@ jobs:
           unzip "selene-$VERSION-linux.zip"
           install -c -m 755 selene /usr/local/bin/selene
       - run: selene lua
-      - name: selene tests
+      - name: selene test
         run: selene .
-        working-directory: tests
+        working-directory: test
 
   test:
     name: Test
@@ -54,13 +54,15 @@ jobs:
     continue-on-error: ${{ matrix.version == 'nightly' }}
     steps:
       - uses: actions/checkout@v2
+        with:
+          submodules: true
       - uses: rhysd/action-setup-vim@v1
         with:
           neovim: ${{ matrix.vim == 'nvim' }}
           version: ${{ matrix.version }}
-      - name: Checkout themis.vim
+      - name: Checkout vim-themis
         uses: actions/checkout@v2
         with:
           repository: thinca/vim-themis
           path: vim-themis
-      - run: THEMIS_PATH=vim-themis/bin/themis make test-${{ matrix.vim }}
+      - run: make test-${{ matrix.vim }}

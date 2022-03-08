@@ -74,6 +74,7 @@ for chunk in values(glob(scriptdir .. "/lua/**/*.lua", false, true)) do
     else
       print(inspect(e))
     end
+    print("\n")
   end)
   if skipped then
     cmd([[echon "skipped\n"]])
