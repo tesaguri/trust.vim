@@ -40,6 +40,7 @@ jobs:
       matrix:
         os:
           - ubuntu-latest
+          - macos-latest
           - windows-latest
         vim:
           - nvim
@@ -48,9 +49,6 @@ jobs:
           - stable
         include:
           - os: ubuntu-latest
-            vim: nvim
-            version: nightly
-          - os: windows-latest
             vim: nvim
             version: nightly
     continue-on-error: ${{ matrix.version == 'nightly' }}
