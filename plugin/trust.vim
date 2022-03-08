@@ -75,36 +75,23 @@ endfunction
 
 command -nargs=? -complete=dir TrustSave call s:TrustSave(<f-args>)
 
-function s:TrustList()
-  try
-    let l:Echo = function('s:Echo')
-  catch
-    " NeoVim
-    let l:Echo = v:null
-  endtry
-
-  call luaeval('
-    \(function()
-    \  _A = _A or vim.api.nvim_echo
-    \  local list = vim.list or function(a)
-    \    return a or {}
-    \  end
-    \  for w, s in require("trust").workspaces() do
-    \    _A(
-    \      list {
-    \        list { w, "Directory" },
-    \        list { "\t" },
-    \        list { s and "trusted" or "distrusted" },
-    \      },
-    \      1,
-    \      list()
-    \    )
-    \  end
-    \end)()
-    \', l:Echo)
+function s:ListWorkspaces(workspaces)
+  for l:workspace in a:workspaces
+    call s:Echo([[l:workspace, 'Directory']], 1, {})
+  endfor
 endfunction
 
-command TrustList call s:TrustList()
+function s:TrustListAllowed()
+  call s:ListWorkspaces(trust#workspaces()[0])
+endfunction
+
+command TrustListAllowed call s:TrustListAllowed()
+
+function s:TrustListDenied()
+  call s:ListWorkspaces(trust#workspaces()[1])
+endfunction
+
+command TrustListDenied call s:TrustListDenied()
 
 if !luaeval('not vim.lsp')
   function s:TrustAllowWorkspace()

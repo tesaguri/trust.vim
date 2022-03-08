@@ -63,7 +63,7 @@ cmd("set runtimepath^=" .. scriptdir .. "/..")
 cmd([[echo 'runtimepath: '.&runtimepath."\n"]])
 
 local success = true
-for chunk in values(glob(scriptdir .. "/src/**/*.lua", false, true)) do
+for chunk in values(glob(scriptdir .. "/lua/**/*.lua", false, true)) do
   cmd("echon 'Running " .. chunk .. " ... '")
   local result, skipped = xpcall(function()
     return dofile(chunk)

@@ -1,13 +1,16 @@
 NVIM_NAME ?= nvim
 VIM_NAME ?= vim
+THEMIS_NAME ?= themis
 
 test: test-nvim test-vim
 
 test-nvim:
-	$(NVIM_NAME) --headless -u NONE +'luafile tests/init.lua' +q
+	THEMIS_VIM=$(NVIM_NAME) $(THEMIS_NAME)
+	$(NVIM_NAME) --headless -u NONE +'luafile test/init.lua' +q
 
 test-vim:
-	$(VIM_NAME) -u NONE +'luafile tests/init.lua' +q
+	THEMIS_VIM=$(VIM_NAME) $(THEMIS_NAME)
+	$(VIM_NAME) -u NONE +'luafile test/init.lua' +q
 
 lint: format selene
 

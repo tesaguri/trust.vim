@@ -60,4 +60,9 @@ jobs:
         with:
           neovim: ${{ matrix.vim == 'nvim' }}
           version: ${{ matrix.version }}
-      - run: make test-${{ matrix.vim }}
+      - name: Checkout themis.vim
+        uses: actions/checkout@v2
+        with:
+          repository: thinca/vim-themis
+          path: vim-themis
+      - run: THEMIS_PATH=vim-themis/bin/themis make test-${{ matrix.vim }}
