@@ -388,7 +388,8 @@ function TLua2DoX_filter.readfile(this,AppStamp,Filename)
     local state = ''  -- luacheck: ignore 231 variable is set but never accessed.
     local offset = 0
     while not (inStream:eof()) do
-      line = string_trim(inStream:getLine())
+      local line_verbatim = inStream:getLine()
+      line = string_trim(line_verbatim)
       --            TCore_Debug_show_var('inStream',inStream)
       --            TCore_Debug_show_var('line',line )
       if string.sub(line,1,2) == '--' then -- it's a comment
@@ -504,6 +505,13 @@ function TLua2DoX_filter.readfile(this,AppStamp,Filename)
           this:warning(inStream:getLineNo(),'something weird here')
         end
         fn_magic = nil -- mustn't indavertently use it again
+      elseif
+        string.find(line_verbatim, "^[%w_]+%s*=")
+        or string.find(line_verbatim, "^local%s+[%w_]+")
+      then
+        local ident = string.match(line_verbatim, "([%w_]+)%s*=")
+          or string.match(line_verbatim, "local%s+([%w_]+)")
+        outStream:writeln(ident .. ";")
 
       -- TODO: If we can make this learn how to generate these, that would be helpful.
       -- elseif string.find(line, "^M%['.*'%] = function") then

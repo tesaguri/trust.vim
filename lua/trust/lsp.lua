@@ -1,11 +1,15 @@
 -- Utilities for controlling NeoVim's `vim.lsp` attach behavior based on the
 -- workspaces' trust statuses.
 
+---@private
 local lsp = {}
+---@private
 local mt = {}
 
+---@private
 local trust = require("trust")
 
+---@private
 local safe_servers_mt = {}
 --- Handle of a set of servers that are run regardless of the workspace's trust
 --- status.
@@ -35,6 +39,7 @@ local safe_servers = {}
 --- hooked version of `vim.lsp.start_client`.
 local last_root_dir
 
+---@private
 local hooked_start_client
 
 --- Overwrites `vim.lsp.start_client` to make it respect the workspace trust
@@ -92,6 +97,7 @@ end
 
 -- Metatable definitions:
 
+---@private
 local index = {}
 
 ---@private
@@ -101,15 +107,16 @@ function mt.__index(_, key)
 end
 
 ---@private
-function index.safe_servers()
+index.safe_servers = function()
   return setmetatable({}, safe_servers_mt)
 end
 
 ---@private
-function index.last_root_dir()
+index.last_root_dir = function()
   return last_root_dir
 end
 
+---@private
 local newindex = {}
 
 ---@private
@@ -119,7 +126,7 @@ function mt.__newindex(_, key, value)
 end
 
 ---@private
-function newindex.safe_servers(value)
+newindex.safe_servers = function(value)
   vim.validate {
     safe_servers = {
       value,
@@ -146,7 +153,7 @@ function newindex.safe_servers(value)
 end
 
 ---@private
-function newindex.last_root_dir()
+newindex.last_root_dir = function()
   error("Refusing to set `last_root_dir` directly")
 end
 

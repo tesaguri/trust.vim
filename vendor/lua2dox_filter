@@ -28,7 +28,7 @@ test_executable(){
 	WHICH=`which ${P_EXE}`
 	if test -z "${WHICH}"
 	then
-		echo "not found \"${P_EXE}\""
+		echo "not found \"${P_EXE}\"" >&2
 	else
 		EXE="${P_EXE}"
 	fi
