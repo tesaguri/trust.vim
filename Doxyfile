@@ -1,0 +1,13 @@
+PROJECT_NAME           = "trust.vim"
+OUTPUT_DIRECTORY       = doxygen
+OUTPUT_LANGUAGE        = English
+EXTENSION_MAPPING      = lua=C
+EXTRACT_ALL            = YES
+WARNINGS               = YES
+WARN_IF_UNDOCUMENTED   = YES
+WARN_IF_DOC_ERROR      = YES
+WARN_NO_PARAMDOC       = YES
+INPUT                  = lua/
+FILE_PATTERNS          = *.lua
+RECURSIVE              = YES
+FILTER_PATTERNS        = *.lua=vendor/lua2dox_filter

@@ -1,7 +1,7 @@
 -- Utilities for controlling NeoVim's `vim.lsp` attach behavior based on the
 -- workspaces' trust statuses.
 
-local M = {}
+local lsp = {}
 local mt = {}
 
 local trust = require("trust")
@@ -42,12 +42,13 @@ local hooked_start_client
 ---
 ---@return function|nil The old `vim.lsp.start_client` function if it has not
 --- been hooked already, `nil` otherwise.
-function M.hook_start_client()
+function lsp.hook_start_client()
   local old = vim.lsp.start_client
   if old == hooked_start_client then
     return
   end
 
+  ---@private
   local function start_client(config)
     -- `lspconfig` sets `root_dir` to `nil` in single file mode.
     -- Fall back to `cmd_cwd` in that case.
@@ -70,7 +71,7 @@ end
 --- Returns the list of |safe_servers| as an array of server name.
 ---
 ---@return table Array of the safe servers' names.
-function M.safe_servers_array()
+function lsp.safe_servers_array()
   return vim.tbl_keys(safe_servers)
 end
 
@@ -78,7 +79,7 @@ end
 --- of a |safe_servers| and `true`.
 ---
 ---@return function An iterator over safe server's names.
-function M.safe_servers_pairs()
+function lsp.safe_servers_pairs()
   -- We don't simply return `pairs(safe_servers)` because it also returns the
   -- original table, which we don't want to expose.
   local s = safe_servers
@@ -93,26 +94,31 @@ end
 
 local index = {}
 
+---@private
 function mt.__index(_, key)
   local handler = index[key]
   return handler and handler()
 end
 
+---@private
 function index.safe_servers()
   return setmetatable({}, safe_servers_mt)
 end
 
+---@private
 function index.last_root_dir()
   return last_root_dir
 end
 
 local newindex = {}
 
+---@private
 function mt.__newindex(_, key, value)
   local handler = newindex[key]
   return handler and handler(value)
 end
 
+---@private
 function newindex.safe_servers(value)
   vim.validate {
     safe_servers = {
@@ -139,14 +145,17 @@ function newindex.safe_servers(value)
   return true
 end
 
+---@private
 function newindex.last_root_dir()
   error("Refusing to set `last_root_dir` directly")
 end
 
+---@private
 function safe_servers_mt.__index(_, key)
   return safe_servers[key] == true
 end
 
+---@private
 function safe_servers_mt.__newindex(_, key, value)
   assert(
     type(key) == "string",
@@ -157,4 +166,4 @@ function safe_servers_mt.__newindex(_, key, value)
   return true
 end
 
-return setmetatable(M, mt)
+return setmetatable(lsp, mt)

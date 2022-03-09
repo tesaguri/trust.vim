@@ -72,37 +72,14 @@ endfunction
 
 " Trust management:
 
-" Marks a path as trusted.
-"
-" Workspaces at the path or its descendants (up to a path explicitly marked as
-" distrusted, if any) will be trusted.
-"
-"@param path string The path to trust.
-"@return boolean The original status value of the node before this function is
-" called.
 function trust#allow(path) abort
   call trust#set(a:path, v:true)
 endfunction
 
-" Marks a path as distrusted.
-"
-" Workspaces at the path or its descendants (up to a path explicitly marked as
-" trusted, if any) will be untrusted.
-"
-"@param path string The path to distrust.
-"@return boolean The original status value of the node before this function is
-" called.
 function trust#deny(path) abort
   call trust#set(a:path, v:false)
 endfunction
 
-" Sets the raw trust status of a path.
-"
-"@param path string The path to set trust status.
-"@param status boolean|nil Trust status value. `true` to trust, `false` to
-" distrust, `nil` to unset.
-"@return boolean The original status value of the node before this function is
-" called.
 function trust#set(path, status) abort
   if type(a:status) == 7
     return trust#remove(a:path)
@@ -114,10 +91,6 @@ function trust#set(path, status) abort
   endif
 endfunction
 
-" Removes the marker of (dis)trust of a path if it has been marked with
-" |trust#allow()| or |trust#deny()|.
-"
-"@param path string The path to unmark.
 function trust#remove(path) abort
   let l:node = s:GetNode(a:path)
   if type(l:node) == v:t_dict
@@ -127,7 +100,6 @@ function trust#remove(path) abort
   endif
 endfunction
 
-" Clears the status of (dis)trust of all paths.
 function trust#clear()
   let s:tree = {}
 endfunction
@@ -159,14 +131,6 @@ function s:ReadfileIfReadable(filename) abort
   endif
 endfunction
 
-" Loads trust statuses from files.
-"
-" Overwrites the on-memory trust statuses.
-"
-"@param base_path string|table|nil String of the path to a directory containing
-" the status files or a table with `allow` and `deny` keys, each of whose value
-" is a string of the path to a status file.
-" Defaults to `stdpath("data")."/trust"` (requires NeoVim).
 function trust#load(base_path) abort
   let [l:allowfile, l:denyfile] = s:FilePaths(a:base_path)
 
@@ -191,12 +155,6 @@ function trust#load(base_path) abort
   let s:tree = l:new_tree
 endfunction
 
-" Saves the on-memory trust statuses into files.
-"
-"@param base_path string|table|nil String of the path to a directory to save the
-" status files in or a table with `allow` and `deny` keys, each of whose value
-" is a string of the path to save the status file.
-" Defaults to `stdpath("data")."/trust"` (requires NeoVim).
 function trust#save(base_path) abort
   let [l:allowfile, l:denyfile] = s:FilePaths(a:base_path)
 
@@ -211,10 +169,6 @@ endfunction
 
 " Trust query:
 
-" Returns `true` if the path is trusted.
-"
-"@param path string Path to a workspace.
-"@return boolean `true` if the path is trusted, `false` otherwise.
 function trust#is_allowed(path) abort
   let l:node = s:tree
   let l:ret = get(l:node, s:trust_key, v:false)
@@ -236,13 +190,6 @@ function trust#is_allowed(path) abort
   return l:ret
 endfunction
 
-" Returns the raw trust status of a path.
-"
-" Unlike |trust#is_allowed()|, this does not respect the trust status of
-" ancestor paths.
-"
-"@return boolean|nil `true` if the path is explicitly marked as trusted, `false`
-" if marked as distrusted, `nil` otherwise.
 function trust#get(path) abort
   let l:node = s:GetNode(a:path)
   if type(l:node) == v:t_dict
@@ -270,14 +217,6 @@ function s:Walk(node, path, allowlist, denylist) abort
   endfor
 endfunction
 
-" Returns an iterator function that, each time it is called, returns a path
-" that has been marked as (dis)trusted as the first value and its trust status
-" as boolean (`true` if trusted, `false` if distrusted) as the second value.
-"
-" If the trust status is modified between the iterator function calls, its
-" return value is unspecified.
-"
-"@return function An iterator over (dis)trusted paths and their trust status.
 function trust#workspaces() abort
   let l:allowlist = []
   let l:denylist = []
