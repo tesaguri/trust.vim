@@ -93,7 +93,7 @@ endfunction
 
 command TrustListDenied call s:TrustListDenied()
 
-if !luaeval('not vim.lsp')
+if exists('*luaeval') && !luaeval('not vim.lsp')
   function s:TrustAllowWorkspace()
     let l:workspace = trust#lsp#last_root_dir()
     if l:workspace == v:null
