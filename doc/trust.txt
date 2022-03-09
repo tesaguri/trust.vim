@@ -1,0 +1,137 @@
+*trust.vim*  A poor imitation of Workspace Trust.
+
+==============================================================================
+TODO
+
+==============================================================================
+Lua module: trust                                                  *lua-trust*
+
+allow({path})                                                  *trust.allow()*
+                Marks a path as trusted.
+
+                Workspaces at the path or its descendants (up to a path
+                explicitly marked as distrusted, if any) will be trusted.
+
+                Parameters: ~
+                    {path}  string The path to trust.
+
+                Return: ~
+                    boolean The original status value of the node before this
+                    function is called.
+
+clear()                                                        *trust.clear()*
+                TODO: Documentation
+
+deny({path})                                                    *trust.deny()*
+                Marks a path as distrusted.
+
+                Workspaces at the path or its descendants (up to a path
+                explicitly marked as trusted, if any) will be untrusted.
+
+                Parameters: ~
+                    {path}  string The path to distrust.
+
+                Return: ~
+                    boolean The original status value of the node before this
+                    function is called.
+
+get({path})                                                      *trust.get()*
+                Returns the raw trust status of a path.
+
+                Unlike |trust#is_allowed()|, this does not respect the trust
+                status of ancestor paths.
+
+                Return: ~
+                    boolean|nil `true` if the path is explicitly marked as
+                    trusted, `false` if marked as distrusted, `nil` otherwise.
+
+is_allowed({path})                                        *trust.is_allowed()*
+                Returns `true` if the path is trusted.
+
+                Parameters: ~
+                    {path}  string Path to a workspace.
+
+                Return: ~
+                    boolean `true` if the path is trusted, `false` otherwise.
+
+load({base_path})                                               *trust.load()*
+                Loads trust statuses from files.
+
+                Overwrites the on-memory trust statuses.
+
+                Parameters: ~
+                    {base_path}  string|table|nil String of the path to a
+                                 directory containing the status files or a
+                                 table with `allow` and `deny` keys, each of
+                                 whose value is a string of the path to a
+                                 status file. Defaults to
+                                 `stdpath("data")."/trust"` (requires NeoVim).
+
+remove({path})                                                *trust.remove()*
+                Removes the marker of (dis)trust of a path if it has been
+                marked with |trust#allow()| or |trust#deny()|.
+
+                Parameters: ~
+                    {path}  string The path to unmark.
+
+save({base_path})                                               *trust.save()*
+                Saves the on-memory trust statuses into files.
+
+                Parameters: ~
+                    {base_path}  string|table|nil String of the path to a
+                                 directory to save the status files in or a
+                                 table with `allow` and `deny` keys, each of
+                                 whose value is a string of the path to save
+                                 the status file. Defaults to
+                                 `stdpath("data")."/trust"` (requires NeoVim).
+
+set({path}, {status})                                            *trust.set()*
+                Sets the raw trust status of a path.
+
+                Parameters: ~
+                    {path}    string The path to set trust status.
+                    {status}  boolean|nil Trust status value. `true` to trust,
+                              `false` to distrust, `nil` to unset.
+
+                Return: ~
+                    boolean The original status value of the node before this
+                    function is called.
+
+workspaces()                                              *trust.workspaces()*
+                Returns the list of (dis)trusted workspaces as an array of
+                arrays, whose first element is a list of trusted workspaces
+                and the second is a list of distrusted workspaces.
+
+                If the trust status is modified between the iterator function
+                calls, its return value is unspecified.
+
+                Return: ~
+                    function An iterator over (dis)trusted paths and their
+                    trust status.
+
+
+==============================================================================
+Lua module: trust.lsp                                          *lua-trust.lsp*
+
+hook_start_client()                            *trust.lsp.hook_start_client()*
+                Overwrites `vim.lsp.start_client` to make it respect the
+                workspace trust statuses.
+
+                Return: ~
+                    function|nil The old `vim.lsp.start_client` function if it
+                    has not been hooked already, `nil` otherwise.
+
+safe_servers_array()                          *trust.lsp.safe_servers_array()*
+                Returns the list of |safe_servers| as an array of server name.
+
+                Return: ~
+                    table Array of the safe servers' names.
+
+safe_servers_pairs()                          *trust.lsp.safe_servers_pairs()*
+                Returns an iterator function that, each time it is called,
+                returns the name of a |safe_servers| and `true` .
+
+                Return: ~
+                    function An iterator over safe server's names.
+
+ vim:tw=78:ts=8:ft=help:norl:

@@ -47,7 +47,7 @@ import shutil
 import textwrap
 import subprocess
 import collections
-import msgpack
+# import msgpack
 import logging
 
 from xml.dom import minidom
@@ -78,185 +78,36 @@ out_dir = os.path.join(base_dir, 'tmp-{target}-doc')
 filter_cmd = '%s %s' % (sys.executable, script_path)
 seen_funcs = set()
 msgs = []  # Messages to show on exit.
-lua2dox_filter = os.path.join(base_dir, 'scripts', 'lua2dox_filter')
+lua2dox_filter = os.path.join(base_dir, 'vendor', 'lua2dox_filter')
 
 CONFIG = {
-    'api': {
-        'mode': 'c',
-        'filename': 'api.txt',
-        # String used to find the start of the generated part of the doc.
-        'section_start_token': '*api-global*',
-        # Section ordering.
-        'section_order': [
-            'vim.c',
-            'vimscript.c',
-            'buffer.c',
-            'extmark.c',
-            'window.c',
-            'win_config.c',
-            'tabpage.c',
-            'autocmd.c',
-            'ui.c',
-        ],
-        # List of files/directories for doxygen to read, separated by blanks
-        'files': os.path.join(base_dir, 'src/nvim/api'),
-        # file patterns used by doxygen
-        'file_patterns': '*.h *.c',
-        # Only function with this prefix are considered
-        'fn_name_prefix': 'nvim_',
-        # Section name overrides.
-        'section_name': {
-            'vim.c': 'Global',
-        },
-        # For generated section names.
-        'section_fmt': lambda name: f'{name} Functions',
-        # Section helptag.
-        'helptag_fmt': lambda name: f'*api-{name.lower()}*',
-        # Per-function helptag.
-        'fn_helptag_fmt': lambda fstem, name: f'*{name}()*',
-        # Module name overrides (for Lua).
-        'module_override': {},
-        # Append the docs for these modules, do not start a new section.
-        'append_only': [],
-    },
-    'lua': {
+    'trust': {
         'mode': 'lua',
-        'filename': 'lua.txt',
-        'section_start_token': '*lua-vim*',
+        'filename': 'trust.txt',
+        'section_start_token': '*lua-trust*',
         'section_order': [
-            'vim.lua',
-            'shared.lua',
-            'uri.lua',
-            'ui.lua',
-            'filetype.lua',
-            'keymap.lua',
-        ],
-        'files': ' '.join([
-            os.path.join(base_dir, 'src/nvim/lua/vim.lua'),
-            os.path.join(base_dir, 'runtime/lua/vim/shared.lua'),
-            os.path.join(base_dir, 'runtime/lua/vim/uri.lua'),
-            os.path.join(base_dir, 'runtime/lua/vim/ui.lua'),
-            os.path.join(base_dir, 'runtime/lua/vim/filetype.lua'),
-            os.path.join(base_dir, 'runtime/lua/vim/keymap.lua'),
-        ]),
-        'file_patterns': '*.lua',
-        'fn_name_prefix': '',
-        'section_name': {
-            'lsp.lua': 'core',
-        },
-        'section_fmt': lambda name: f'Lua module: {name.lower()}',
-        'helptag_fmt': lambda name: f'*lua-{name.lower()}*',
-        'fn_helptag_fmt': lambda fstem, name: f'*{fstem}.{name}()*',
-        'module_override': {
-            # `shared` functions are exposed on the `vim` module.
-            'shared': 'vim',
-            'uri': 'vim',
-            'ui': 'vim.ui',
-            'filetype': 'vim.filetype',
-            'keymap': 'vim.keymap',
-        },
-        'append_only': [
-            'shared.lua',
-        ],
-    },
-    'lsp': {
-        'mode': 'lua',
-        'filename': 'lsp.txt',
-        'section_start_token': '*lsp-core*',
-        'section_order': [
+            'trust.lua',
             'lsp.lua',
-            'buf.lua',
-            'diagnostic.lua',
-            'codelens.lua',
-            'tagfunc.lua',
-            'handlers.lua',
-            'util.lua',
-            'log.lua',
-            'rpc.lua',
-            'sync.lua',
-            'protocol.lua',
         ],
         'files': ' '.join([
-            os.path.join(base_dir, 'runtime/lua/vim/lsp'),
-            os.path.join(base_dir, 'runtime/lua/vim/lsp.lua'),
-        ]),
-        'file_patterns': '*.lua',
-        'fn_name_prefix': '',
-        'section_name': {'lsp.lua': 'lsp'},
-        'section_fmt': lambda name: (
-            'Lua module: vim.lsp'
-            if name.lower() == 'lsp'
-            else f'Lua module: vim.lsp.{name.lower()}'),
-        'helptag_fmt': lambda name: (
-            '*lsp-core*'
-            if name.lower() == 'lsp'
-            else f'*lsp-{name.lower()}*'),
-        'fn_helptag_fmt': lambda fstem, name: (
-            f'*vim.lsp.{name}()*'
-            if fstem == 'lsp' and name != 'client'
-            else (
-                '*vim.lsp.client*'
-                # HACK. TODO(justinmk): class/structure support in lua2dox
-                if 'lsp.client' == f'{fstem}.{name}'
-                else f'*vim.lsp.{fstem}.{name}()*')),
-        'module_override': {},
-        'append_only': [],
-    },
-    'diagnostic': {
-        'mode': 'lua',
-        'filename': 'diagnostic.txt',
-        'section_start_token': '*diagnostic-api*',
-        'section_order': [
-            'diagnostic.lua',
-        ],
-        'files': os.path.join(base_dir, 'runtime/lua/vim/diagnostic.lua'),
-        'file_patterns': '*.lua',
-        'fn_name_prefix': '',
-        'section_name': {'diagnostic.lua': 'diagnostic'},
-        'section_fmt': lambda _: 'Lua module: vim.diagnostic',
-        'helptag_fmt': lambda _: '*diagnostic-api*',
-        'fn_helptag_fmt': lambda fstem, name: f'*vim.{fstem}.{name}()*',
-        'module_override': {},
-        'append_only': [],
-    },
-    'treesitter': {
-        'mode': 'lua',
-        'filename': 'treesitter.txt',
-        'section_start_token': '*lua-treesitter-core*',
-        'section_order': [
-            'treesitter.lua',
-            'language.lua',
-            'query.lua',
-            'highlighter.lua',
-            'languagetree.lua',
-        ],
-        'files': ' '.join([
-            os.path.join(base_dir, 'runtime/lua/vim/treesitter.lua'),
-            os.path.join(base_dir, 'runtime/lua/vim/treesitter/'),
+            os.path.join(base_dir, 'lua/trust.lua'),
+            os.path.join(base_dir, 'lua/trust/lsp.lua'),
         ]),
         'file_patterns': '*.lua',
         'fn_name_prefix': '',
         'section_name': {},
         'section_fmt': lambda name: (
-            'Lua module: vim.treesitter'
-            if name.lower() == 'treesitter'
-            else f'Lua module: vim.treesitter.{name.lower()}'),
+            'Lua module: trust'
+            if name.lower() == 'trust'
+            else f'Lua module: trust.{name.lower()}'),
         'helptag_fmt': lambda name: (
-            '*lua-treesitter-core*'
-            if name.lower() == 'treesitter'
-            else f'*treesitter-{name.lower()}*'),
+            '*lua-trust*'
+            if name.lower() == 'trust'
+            else f'*lua-trust.{name.lower()}*'),
         'fn_helptag_fmt': lambda fstem, name: (
-            f'*{name}()*'
-            if name != 'new'
-            else f'*{fstem}.{name}()*'),
-        # 'fn_helptag_fmt': lambda fstem, name: (
-        #     f'*vim.treesitter.{name}()*'
-        #     if fstem == 'treesitter'
-        #     else (
-        #         '*vim.lsp.client*'
-        #         # HACK. TODO(justinmk): class/structure support in lua2dox
-        #         if 'lsp.client' == f'{fstem}.{name}'
-        #         else f'*vim.lsp.{fstem}.{name}()*')),
+            f'*trust.{name}()*'
+            if fstem == 'trust'
+            else f'*trust.{fstem}.{name}()*'),
         'module_override': {},
         'append_only': [],
     }
@@ -979,11 +830,11 @@ def main(config, args):
     for target in CONFIG:
         if args.target is not None and target != args.target:
             continue
-        mpack_file = os.path.join(
-            base_dir, 'runtime', 'doc',
-            CONFIG[target]['filename'].replace('.txt', '.mpack'))
-        if os.path.exists(mpack_file):
-            os.remove(mpack_file)
+#         mpack_file = os.path.join(
+#             base_dir, 'runtime', 'doc',
+#             CONFIG[target]['filename'].replace('.txt', '.mpack'))
+#         if os.path.exists(mpack_file):
+#             os.remove(mpack_file)
 
         output_dir = out_dir.format(target=target)
         log.info("Generating documentation for %s in folder %s",
@@ -1006,7 +857,7 @@ def main(config, args):
         if p.returncode:
             sys.exit(p.returncode)
 
-        fn_map_full = {}  # Collects all functions as each module is processed.
+        # fn_map_full = {}  # Collects all functions as each module is processed.
         sections = {}
         intros = {}
         sep = '=' * text_width
@@ -1079,7 +930,7 @@ def main(config, args):
                         title = CONFIG[target]['section_fmt'](sectname)
                         helptag = CONFIG[target]['helptag_fmt'](sectname)
                         sections[filename] = (title, helptag, doc)
-                        fn_map_full.update(fn_map)
+                        # fn_map_full.update(fn_map)
 
         if len(sections) == 0:
             fail(f'no sections for target: {target}')
@@ -1109,16 +960,15 @@ def main(config, args):
         docs = docs.rstrip() + '\n\n'
         docs += ' vim:tw=78:ts=8:ft=help:norl:\n'
 
-        doc_file = os.path.join(base_dir, 'runtime', 'doc',
-                                CONFIG[target]['filename'])
+        doc_file = os.path.join(base_dir, 'doc', CONFIG[target]['filename'])
 
         delete_lines_below(doc_file, CONFIG[target]['section_start_token'])
         with open(doc_file, 'ab') as fp:
             fp.write(docs.encode('utf8'))
 
-        fn_map_full = collections.OrderedDict(sorted(fn_map_full.items()))
-        with open(mpack_file, 'wb') as fp:
-            fp.write(msgpack.packb(fn_map_full, use_bin_type=True))
+#         fn_map_full = collections.OrderedDict(sorted(fn_map_full.items()))
+#         with open(mpack_file, 'wb') as fp:
+#             fp.write(msgpack.packb(fn_map_full, use_bin_type=True))
 
         if not args.keep_tmpfiles:
             shutil.rmtree(output_dir)
