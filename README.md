@@ -1,17 +1,17 @@
-# trust.nvim
+# trust.vim
 
-A poor imitation of Workspace Trust™️ for NeoVim/Vim8.
+A poor imitation of Workspace Trust™️ for NeoVim/Vim.
 
 ## Overview
 
-`trust.nvim` provides utilities for managing "trusted" paths like in Visual Studio Code's Workspace
-Trust feature. It also comes with an integration with NeoVim's builtin `vim.lsp` framework,
-preventing language servers from running on untrusted workspaces.
+`trust.vim` is a NeoVim/Vim plugin that provides utilities for managing "trusted" paths like in
+Visual Studio Code's Workspace Trust feature. It also comes with an integration with NeoVim's
+builtin `vim.lsp` framework, preventing language servers from running on untrusted workspaces.
 
 ## Prerequisites
 
-- NeoVim or Vim (compiled with the `+lua` option), and
-- Unix-like environment (current implementation assumes it in path manipulation)
+- NeoVim (recommended), or
+- Vim
 
 Both are tested with the latest versions.
 
@@ -35,7 +35,9 @@ git clone https://github.com/tesaguri/trust.vim.git "$HOME/.vim/pack/plugins/sta
 
 Usually however, you may want to manage the plugin with your favorite plugin manager, though I'm not
 going to enumerate installation instructions for every manager, most of which should be something
-like `AddOrPlugOrWhatever 'tesaguri/trust.vim'` in your vimrc.
+like `AddOrPlugOrWhatever 'tesaguri/trust.vim'` in your vimrc. It is also recommended that you pin
+the package to a versioned branch (e.g. `v0.1` branch) because I may make changes to the plugin that
+break your vimrc in a new release.
 
 ## Setup
 
@@ -105,9 +107,11 @@ overwrite the on-memory trust database with the contents of the files. For examp
 
 ```lua
 local trust = require("trust")
+local expand = vim.fn.expand
 trust.load()
-trust.allow(vim.fn.expand("~/workspace"))
-trust.deny(vim.fn.expand("~/workspace/forks"))
+
+trust.allow(expand("~/workspace"))
+trust.deny(expand("~/workspace/forks"))
 ```
 
 ## License
