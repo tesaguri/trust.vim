@@ -17,7 +17,8 @@ local safe_servers_mt = {}
 --- This is not an ordinary dictionary and you can only inspect its content
 --- through indexing.
 ---
---- Examples: >
+--- Examples:
+--- <pre>
 --- local trust_lsp = require("trust.lsp")
 ---
 --- -- Set an individual server:
@@ -32,7 +33,7 @@ local safe_servers_mt = {}
 --- assert(trust_lsp.safe_servers.dhall_lsp_server == true)
 --- -- or use the `safe_servers_pairs()` iterator function:
 --- assert(trust_lsp.safe_servers_pairs()() == "dhall_lsp_server")
---- <
+--- </pre>
 local safe_servers = {}
 
 --- The value of `root_dir` config key that were passed in the last call of the

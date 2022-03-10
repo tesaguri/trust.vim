@@ -67,7 +67,7 @@ end
 ---@private
 local remove = vim.funcref("trust#remove")
 --- Removes the marker of (dis)trust of a path if it has been marked with
---- |trust#allow()| or |trust#deny()|.
+--- |trust.allow()| or |trust.deny()|.
 ---
 ---@param path string The path to unmark.
 function trust.remove(path)
@@ -139,7 +139,7 @@ end
 local get = vim.funcref("trust#get")
 --- Returns the raw trust status of a path.
 ---
---- Unlike |trust#is_allowed()|, this does not respect the trust status of
+--- Unlike |trust.is_allowed()|, this does not respect the trust status of
 --- ancestor paths.
 ---
 ---@return boolean|nil `true` if the path is explicitly marked as trusted,
