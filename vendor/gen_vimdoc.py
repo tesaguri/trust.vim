@@ -94,20 +94,20 @@ CONFIG = {
             os.path.join(base_dir, 'lua/trust/lsp.lua'),
         ]),
         'file_patterns': '*.lua',
-        'fn_name_prefix': '',
+        'item_name_prefix': '',
         'section_name': {},
         'section_fmt': lambda name: (
             'Lua module: trust'
             if name.lower() == 'trust'
             else f'Lua module: trust.{name.lower()}'),
         'helptag_fmt': lambda name: (
-            '*lua-trust*'
+            'lua-trust'
             if name.lower() == 'trust'
-            else f'*lua-trust.{name.lower()}*'),
-        'fn_helptag_fmt': lambda fstem, name: (
-            f'*trust.{name}()*'
-            if fstem == 'trust'
-            else f'*trust.{fstem}.{name}()*'),
+            else f'lua-trust.{name.lower()}'),
+        'item_helptag_fmt': lambda stem, name: (
+            f'trust.{name}'
+            if stem == 'trust'
+            else f'trust.{stem}.{name}'),
         'module_override': {},
         'append_only': [],
     }
@@ -551,8 +551,8 @@ def extract_from_xml(filename, target, width):
     """Extracts Doxygen info as maps without formatting the text.
 
     Returns two maps:
-      1. Functions
-      2. Deprecated functions
+      1. Items
+      2. Deprecated items
 
     The `fmt_vimhelp` global controls some special cases for use by
     fmt_doxygen_xml_as_vimhelp(). (TODO: ugly :)
@@ -560,14 +560,16 @@ def extract_from_xml(filename, target, width):
     global xrefs
     global fmt_vimhelp
     xrefs.clear()
-    fns = {}  # Map of func_name:docstring.
-    deprecated_fns = {}  # Map of func_name:docstring.
+    items = {}  # Map of item_name:docstring.
+    deprecated_items = {}  # Map of item_name:docstring.
 
     dom = minidom.parse(filename)
     compoundname = get_text(dom.getElementsByTagName('compoundname')[0])
     for member in dom.getElementsByTagName('memberdef'):
+        kind = member.getAttribute('kind')
+
         if member.getAttribute('static') == 'yes' or \
-                member.getAttribute('kind') != 'function' or \
+                kind not in ['function', 'variable'] or \
                 member.getAttribute('prot') == 'private' or \
                 get_text(get_child(member, 'name')).startswith('_'):
             continue
@@ -576,95 +578,126 @@ def extract_from_xml(filename, target, width):
         if 'private' in loc.getAttribute('file'):
             continue
 
-        return_type = get_text(get_child(member, 'type'))
-        if return_type == '':
-            continue
-
-        if return_type.startswith(('ArrayOf', 'DictionaryOf')):
-            parts = return_type.strip('_').split('_')
-            return_type = '{}({})'.format(parts[0], ', '.join(parts[1:]))
-
         name = get_text(get_child(member, 'name'))
 
-        annotations = get_text(get_child(member, 'argsstring'))
-        if annotations and ')' in annotations:
-            annotations = annotations.rsplit(')', 1)[-1].strip()
-        # XXX: (doxygen 1.8.11) 'argsstring' only includes attributes of
-        # non-void functions.  Special-case void functions here.
-        if name == 'nvim_get_mode' and len(annotations) == 0:
-            annotations += 'FUNC_API_FAST'
-        annotations = filter(None, map(lambda x: annotation_map.get(x),
-                                       annotations.split()))
+        if fmt_vimhelp:
+            stem = '?'
+            if '.' in compoundname:
+                stem = compoundname.split('.')[0]
+                stem = CONFIG[target]['module_override'].get(stem, stem)
 
-        params = []
-        type_length = 0
-
-        for param in iter_children(member, 'param'):
-            param_type = get_text(get_child(param, 'type')).strip()
-            param_name = ''
-            declname = get_child(param, 'declname')
-            if declname:
-                param_name = get_text(declname).strip()
-            elif CONFIG[target]['mode'] == 'lua':
-                # XXX: this is what lua2dox gives us...
-                param_name = param_type
-                param_type = ''
-
-            if param_name in param_exclude:
+        if kind == 'variable':
+            vimtag = '*%s*' % CONFIG[target]['item_helptag_fmt'](stem, name)
+            item = {
+                'doc': [],
+                'seealso': [],
+            }
+            items[name] = item
+        elif kind == 'function':
+            return_type = get_text(get_child(member, 'type'))
+            if return_type == '':
                 continue
 
-            if fmt_vimhelp and param_type.endswith('*'):
-                param_type = param_type.strip('* ')
-                param_name = '*' + param_name
+            if return_type.startswith(('ArrayOf', 'DictionaryOf')):
+                parts = return_type.strip('_').split('_')
+                return_type = '{}({})'.format(parts[0], ', '.join(parts[1:]))
 
-            type_length = max(type_length, len(param_type))
-            params.append((param_type, param_name))
+            annotations = get_text(get_child(member, 'argsstring'))
+            if annotations and ')' in annotations:
+                annotations = annotations.rsplit(')', 1)[-1].strip()
+            # XXX: (doxygen 1.8.11) 'argsstring' only includes attributes of
+            # non-void functions.  Special-case void functions here.
+            if name == 'nvim_get_mode' and len(annotations) == 0:
+                annotations += 'FUNC_API_FAST'
+            annotations = filter(None, map(lambda x: annotation_map.get(x),
+                                           annotations.split()))
 
-        # Handle Object Oriented style functions here.
-        #   We make sure they have "self" in the parameters,
-        #   and a parent function
-        if return_type.startswith('function') \
-                and len(return_type.split(' ')) >= 2 \
-                and any(x[1] == 'self' for x in params):
-            split_return = return_type.split(' ')
-            name = f'{split_return[1]}:{name}'
+            params = []
+            type_length = 0
 
-        c_args = []
-        for param_type, param_name in params:
-            c_args.append(('    ' if fmt_vimhelp else '') + (
-                '%s %s' % (param_type.ljust(type_length), param_name)).strip())
+            for param in iter_children(member, 'param'):
+                param_type = get_text(get_child(param, 'type')).strip()
+                param_name = ''
+                declname = get_child(param, 'declname')
+                if declname:
+                    param_name = get_text(declname).strip()
+                elif CONFIG[target]['mode'] == 'lua':
+                    # XXX: this is what lua2dox gives us...
+                    param_name = param_type
+                    param_type = ''
+
+                if param_name in param_exclude:
+                    continue
+
+                if fmt_vimhelp and param_type.endswith('*'):
+                    param_type = param_type.strip('* ')
+                    param_name = '*' + param_name
+
+                type_length = max(type_length, len(param_type))
+                params.append((param_type, param_name))
+
+            # Handle Object Oriented style functions here.
+            #   We make sure they have "self" in the parameters,
+            #   and a parent function
+            if return_type.startswith('function') \
+                    and len(return_type.split(' ')) >= 2 \
+                    and any(x[1] == 'self' for x in params):
+                split_return = return_type.split(' ')
+                name = f'{split_return[1]}:{name}'
+
+            c_args = []
+            for param_type, param_name in params:
+                c_args.append(('    ' if fmt_vimhelp else '') + (
+                    '%s %s' % (param_type.ljust(type_length), param_name)).strip())
+
+            args = ', '.join('{%s}' % a[1] for a in params
+                             if a[0] not in ('void', 'Error'))
+
+            if fmt_vimhelp:
+                vimtag = '*%s()*' % CONFIG[target]['item_helptag_fmt'](stem, name)
+                c_decl = textwrap.indent('%s %s(\n%s\n);' % (return_type, name,
+                                                             ',\n'.join(c_args)),
+                                         '    ')
+            else:
+                c_decl = '%s %s(%s);' % (return_type, name, ', '.join(c_args))
+
+            item = {
+                'annotations': list(annotations),
+                'parameters': params,
+                'parameters_doc': collections.OrderedDict(),
+                'doc': [],
+                'return': [],
+                'seealso': [],
+            }
+
+            if INCLUDE_C_DECL:
+                item['c_decl'] = c_decl
+
+            if 'Deprecated' in str(xrefs):
+                deprecated_items[name] = item
+            elif name.startswith(CONFIG[target]['item_name_prefix']):
+                items[name] = item
+
+            xrefs.clear()
 
         if not fmt_vimhelp:
-            pass
+            signature = f'{name}({args})' if kind == 'function' else name
         else:
-            fstem = '?'
-            if '.' in compoundname:
-                fstem = compoundname.split('.')[0]
-                fstem = CONFIG[target]['module_override'].get(fstem, fstem)
-            vimtag = CONFIG[target]['fn_helptag_fmt'](fstem, name)
-
-        prefix = '%s(' % name
-        suffix = '%s)' % ', '.join('{%s}' % a[1] for a in params
-                                   if a[0] not in ('void', 'Error'))
-
-        if not fmt_vimhelp:
-            c_decl = '%s %s(%s);' % (return_type, name, ', '.join(c_args))
-            signature = prefix + suffix
-        else:
-            c_decl = textwrap.indent('%s %s(\n%s\n);' % (return_type, name,
-                                                         ',\n'.join(c_args)),
-                                     '    ')
-
             # Minimum 8 chars between signature and vimtag
             lhs = (width - 8) - len(vimtag)
 
-            if len(prefix) + len(suffix) > lhs:
+            args_len = len(args) + 2 if kind == 'function' else 0
+            if len(name) + args_len > lhs:
                 signature = vimtag.rjust(width) + '\n'
-                signature += doc_wrap(suffix, width=width, prefix=prefix,
-                                      func=True)
+                if kind == 'function':
+                    signature += doc_wrap(f'{name}(', width=width,
+                                          prefix=f'{args})', func=True)
+                else:
+                    signature += name
             else:
-                signature = prefix + suffix
+                signature = f'{name}({args})' if kind == 'function' else name
                 signature += vimtag.rjust(width - len(signature))
+        item['signature'] = signature
 
         paras = []
         brief_desc = find_first(member, 'briefdescription')
@@ -681,83 +714,65 @@ def extract_from_xml(filename, target, width):
                     re.sub(r'\n\s*\n+', '\n',
                            desc.toprettyxml(indent='  ', newl='\n')), ' ' * 16))
 
-        fn = {
-            'annotations': list(annotations),
-            'signature': signature,
-            'parameters': params,
-            'parameters_doc': collections.OrderedDict(),
-            'doc': [],
-            'return': [],
-            'seealso': [],
-        }
         if fmt_vimhelp:
-            fn['desc_node'] = desc  # HACK :(
+            item['desc_node'] = desc  # HACK :(
 
         for m in paras:
             if 'text' in m:
                 if not m['text'] == '':
-                    fn['doc'].append(m['text'])
-            if 'params' in m:
+                    item['doc'].append(m['text'])
+            if 'params' in m and len(m['params']) > 0:
                 # Merge OrderedDicts.
-                fn['parameters_doc'].update(m['params'])
+                item['parameters_doc'].update(m['params'])
             if 'return' in m and len(m['return']) > 0:
-                fn['return'] += m['return']
+                item['return'] += m['return']
             if 'seealso' in m and len(m['seealso']) > 0:
-                fn['seealso'] += m['seealso']
+                item['seealso'] += m['seealso']
 
-        if INCLUDE_C_DECL:
-            fn['c_decl'] = c_decl
-
-        if 'Deprecated' in str(xrefs):
-            deprecated_fns[name] = fn
-        elif name.startswith(CONFIG[target]['fn_name_prefix']):
-            fns[name] = fn
-
-        xrefs.clear()
-
-    fns = collections.OrderedDict(sorted(
-        fns.items(),
+    items = collections.OrderedDict(sorted(
+        items.items(),
         key=lambda key_item_tuple: key_item_tuple[0].lower()))
-    deprecated_fns = collections.OrderedDict(sorted(deprecated_fns.items()))
-    return (fns, deprecated_fns)
+    deprecated_items = collections.OrderedDict(sorted(deprecated_items.items()))
+    return (items, deprecated_items)
 
 
 def fmt_doxygen_xml_as_vimhelp(filename, target):
     """Entrypoint for generating Vim :help from from Doxygen XML.
 
     Returns 3 items:
-      1. Vim help text for functions found in `filename`.
-      2. Vim help text for deprecated functions.
+      1. Vim help text for items found in `filename`.
+      2. Vim help text for deprecated items.
     """
     global fmt_vimhelp
     fmt_vimhelp = True
-    fns_txt = {}  # Map of func_name:vim-help-text.
-    deprecated_fns_txt = {}  # Map of func_name:vim-help-text.
-    fns, _ = extract_from_xml(filename, target, width=text_width)
+    items_txt = {}  # Map of item_name:vim-help-text.
+    deprecated_items_txt = {}  # Map of item_name:vim-help-text.
+    items, _ = extract_from_xml(filename, target, width=text_width)
 
-    for name, fn in fns.items():
+    for name, item in items.items():
         # Generate Vim :help for parameters.
-        if fn['desc_node']:
-            doc = fmt_node_as_vimhelp(fn['desc_node'])
+        if item['desc_node']:
+            doc = fmt_node_as_vimhelp(item['desc_node'])
         if not doc:
             doc = 'TODO: Documentation'
 
-        annotations = '\n'.join(fn['annotations'])
-        if annotations:
-            annotations = ('\n\nAttributes: ~\n' +
-                           textwrap.indent(annotations, '    '))
-            i = doc.rfind('Parameters: ~')
-            if i == -1:
-                doc += annotations
-            else:
-                doc = doc[:i] + annotations + '\n\n' + doc[i:]
+        if 'annotations' in item:
+            annotations = '\n'.join(item['annotations'])
+            if annotations:
+                annotations = ('\n\nAttributes: ~\n' +
+                               textwrap.indent(annotations, '    '))
+                i = doc.rfind('Parameters: ~')
+                if i == -1:
+                    doc += annotations
+                else:
+                    doc = doc[:i] + annotations + '\n\n' + doc[i:]
 
-        if INCLUDE_C_DECL:
+        if INCLUDE_C_DECL and 'c_decl' in item:
             doc += '\n\nC Declaration: ~\n>\n'
-            doc += fn['c_decl']
+            doc += item['c_decl']
             doc += '\n<'
 
-        func_doc = fn['signature'] + '\n'
+        func_doc = item['signature'] + '\n'
         func_doc += textwrap.indent(clean_lines(doc), ' ' * 16)
 
         # Verbatim handling.
@@ -790,15 +805,15 @@ def fmt_doxygen_xml_as_vimhelp(filename, target):
         func_doc = "\n".join(split_lines)
 
         if 'Deprecated' in xrefs:
-            deprecated_fns_txt[name] = func_doc
-        elif name.startswith(CONFIG[target]['fn_name_prefix']):
-            fns_txt[name] = func_doc
+            deprecated_items_txt[name] = func_doc
+        elif name.startswith(CONFIG[target]['item_name_prefix']):
+            items_txt[name] = func_doc
 
         xrefs.clear()
 
     fmt_vimhelp = False
-    return ('\n\n'.join(list(fns_txt.values())),
-            '\n\n'.join(list(deprecated_fns_txt.values())))
+    return ('\n\n'.join(list(items_txt.values())),
+            '\n\n'.join(list(deprecated_items_txt.values())))
 
 
 def delete_lines_below(filename, tokenstr):
@@ -857,7 +872,7 @@ def main(config, args):
         if p.returncode:
             sys.exit(p.returncode)
 
-        # fn_map_full = {}  # Collects all functions as each module is processed.
+        # item_map_full = {}  # Collects all items as each module is processed.
         sections = {}
         intros = {}
         sep = '=' * text_width
@@ -899,7 +914,7 @@ def main(config, args):
                 xmlfile = os.path.join(base,
                                        '{}.xml'.format(compound.getAttribute('refid')))
                 # Extract unformatted (*.mpack).
-                fn_map, _ = extract_from_xml(xmlfile, target, width=9999)
+                # item_map, _ = extract_from_xml(xmlfile, target, width=9999)
                 # Extract formatted (:help).
                 functions_text, deprecated_text = fmt_doxygen_xml_as_vimhelp(
                     os.path.join(base, '{}.xml'.format(
@@ -928,9 +943,9 @@ def main(config, args):
                         sectname = CONFIG[target]['section_name'].get(
                                 filename, sectname)
                         title = CONFIG[target]['section_fmt'](sectname)
-                        helptag = CONFIG[target]['helptag_fmt'](sectname)
+                        helptag = '*%s*' % CONFIG[target]['helptag_fmt'](sectname)
                         sections[filename] = (title, helptag, doc)
-                        # fn_map_full.update(fn_map)
+                        # item_map_full.update(item_map)
 
         if len(sections) == 0:
             fail(f'no sections for target: {target}')
@@ -966,9 +981,9 @@ def main(config, args):
         with open(doc_file, 'ab') as fp:
             fp.write(docs.encode('utf8'))
 
-#         fn_map_full = collections.OrderedDict(sorted(fn_map_full.items()))
+#         item_map_full = collections.OrderedDict(sorted(item_map_full.items()))
 #         with open(mpack_file, 'wb') as fp:
-#             fp.write(msgpack.packb(fn_map_full, use_bin_type=True))
+#             fp.write(msgpack.packb(item_map_full, use_bin_type=True))
 
         if not args.keep_tmpfiles:
             shutil.rmtree(output_dir)

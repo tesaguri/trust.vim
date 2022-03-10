@@ -121,6 +121,29 @@ hook_start_client()                            *trust.lsp.hook_start_client()*
                     function|nil The old `vim.lsp.start_client` function if it
                     has not been hooked already, `nil` otherwise.
 
+last_root_dir                                        *trust.lsp.last_root_dir*
+                The value of `root_dir` config key that were passed in the
+                last call of the hooked version of `vim.lsp.start_client` .
+
+safe_servers                                          *trust.lsp.safe_servers*
+                Handle of a set of servers that are run regardless of the
+                workspace's trust status.
+
+                This is not an ordinary dictionary and you can only inspect
+                its content through indexing.
+
+                Examples: > local trust_lsp = require("trust.lsp")
+
+                Set an individual server:
+                trust_lsp.safe_servers.dhall_lsp_server = true
+
+                Set multiple servers at once: trust_lsp.safe_servers = {
+                "dhall_lsp_server" }
+
+                You cannot use `next` on it: assert(next(trust_lsp.safe_servers) == nil) But you can index it by the server name:
+                assert(trust_lsp.safe_servers.dhall_lsp_server == true) or use the `safe_servers_pairs()` iterator function: assert(trust_lsp.safe_servers_pairs()() ==
+                "dhall_lsp_server") <
+
 safe_servers_array()                          *trust.lsp.safe_servers_array()*
                 Returns the list of |safe_servers| as an array of server name.
 
