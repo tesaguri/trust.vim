@@ -15,7 +15,7 @@ test-vim:
 lint: format selene
 
 format:
-	stylua --check .
+	stylua --check lua test
 
 selene:
 	selene lua
