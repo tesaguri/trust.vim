@@ -75,7 +75,7 @@ Or in `init.vim`:
     call trust#load()
 <
 If you want to write some trusted directories in the vimrc while keeping
-others from it, be sure to write the list of directories _after_ calling the
+others from it, be sure to write the list of directories after calling the
 `load()` function. Otherwise, the function will overwrite the on-memory trust
 database with the contents of the files. For example:
 >
