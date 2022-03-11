@@ -67,13 +67,21 @@ function s:TrustLoad(base_path = v:null)
   call trust#load(s:ExpandIfAny(a:base_path))
 endfunction
 
-command -nargs=? -complete=dir TrustLoad call s:TrustLoad(<f-args>)
+if exists('*stdpath')
+  command -nargs=? -complete=dir TrustLoad call s:TrustLoad(<f-args>)
+else
+  command -nargs=1 -complete=dir TrustLoad call s:TrustLoad(<f-args>)
+endif
 
 function s:TrustSave(base_path = v:null)
   call trust#save(s:ExpandIfAny(a:base_path))
 endfunction
 
-command -nargs=? -complete=dir TrustSave call s:TrustSave(<f-args>)
+if exists('*stdpath')
+  command -nargs=? -complete=dir TrustSave call s:TrustSave(<f-args>)
+else
+  command -nargs=1 -complete=dir TrustSave call s:TrustSave(<f-args>)
+endif
 
 function s:ListWorkspaces(workspaces)
   for l:workspace in a:workspaces
