@@ -1,6 +1,6 @@
 " Common utilities:
 
-if has("win32")
+if has('win32')
   let s:sep = '\'
   let s:use_drive_letter = 1
 else
@@ -201,7 +201,7 @@ endfunction
 
 function s:Walk(node, path, allowlist, denylist) abort
   if has_key(a:node, s:trust_key)
-    let l:path = a:path == "" ? s:sep : a:path
+    let l:path = a:path == '' ? s:sep : a:path
     if a:node[s:trust_key]
       call add(a:allowlist, l:path)
     else
@@ -220,6 +220,6 @@ endfunction
 function trust#workspaces() abort
   let l:allowlist = []
   let l:denylist = []
-  call s:Walk(s:tree, "", l:allowlist, l:denylist)
+  call s:Walk(s:tree, '', l:allowlist, l:denylist)
   return [l:allowlist, l:denylist]
 endfunction
