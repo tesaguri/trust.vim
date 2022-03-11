@@ -84,7 +84,6 @@ CONFIG = {
     'trust': {
         'mode': 'lua',
         'filename': 'trust.txt',
-        'section_start_token': '*lua-trust*',
         'section_order': [
             'trust.lua',
             'lsp.lua',
@@ -956,6 +955,7 @@ def main(config, args):
             raise RuntimeError(
                 'found new modules "{}"; update the "section_order" map'.format(
                     set(sections).difference(CONFIG[target]['section_order'])))
+        section_start_token = sections[CONFIG[target]['section_order'][0]][1]
 
         docs = ''
 
@@ -980,7 +980,8 @@ def main(config, args):
 
         doc_file = os.path.join(base_dir, 'doc', CONFIG[target]['filename'])
 
-        delete_lines_below(doc_file, CONFIG[target]['section_start_token'])
+        if os.path.exists(doc_file):
+            delete_lines_below(doc_file, section_start_token)
         with open(doc_file, 'ab') as fp:
             fp.write(docs.encode('utf8'))
 
