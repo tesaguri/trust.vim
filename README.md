@@ -1,27 +1,27 @@
 # trust.vim
 
-A poor imitation of Workspace Trust™️ for NeoVim/Vim.
+A poor imitation of Workspace Trust™️ for Neovim/Vim.
 
 ## Overview
 
-`trust.vim` is a NeoVim/Vim plugin that provides utilities for managing "trusted" paths like in
-Visual Studio Code's Workspace Trust feature. It also comes with an integration with NeoVim's
+`trust.vim` is a Neovim/Vim plugin that provides utilities for managing "trusted" paths like in
+Visual Studio Code's Workspace Trust feature. It also comes with an integration with Neovim's
 builtin `vim.lsp` framework, preventing language servers from running on untrusted workspaces.
 
 ## Prerequisites
 
-- NeoVim (recommended), or
+- Neovim (recommended), or
 - Vim
 
 Both are tested with the latest versions.
 
-Note that the `trust.lsp` module (and `trust#lsp`) depends on NeoVim's `vim.lsp` Lua module, which
-is only available on NeoVim. On Vim, what the plugin provides is a mere trust database and its
+Note that the `trust.lsp` module (and `trust#lsp`) depends on Neovim's `vim.lsp` Lua module, which
+is only available on Neovim. On Vim, what the plugin provides is a mere trust database and its
 management utilities, on which you write integrations with other features.
 
 ## Installation
 
-Using the builtin Vim packages (`:help packages`), for NeoVim:
+Using the builtin Vim packages (`:help packages`), for Neovim:
 
 ```sh
 git clone https://github.com/tesaguri/trust.vim.git "${XDG_DATA_HOME:-$HOME/.local/share}/nvim/site/pack/plugins/start/trust.vim"
@@ -54,7 +54,7 @@ trust.deny(expand("~/workspace/forks"))
 trust.allow(expand("~/workspace/forks/some-thirdparty-repo-you-trust")
 -- ...
 
--- Settings for NeoVim's builtin `vim.lsp` framework follows:
+-- Settings for Neovim's builtin `vim.lsp` framework follows:
 local trust_lsp = require("trust.lsp")
 
 -- List of servers that are safe to run in arbitrary directory:
@@ -85,7 +85,7 @@ the trust database from a directory. First, create the database files with Ex co
 :" Temporarily mark a directory as distrusted:
 :TrustDeny ./thirdparty
 :" Save the temporary trust database to files.
-:" If the argument is omitted, defaults to `stdpath("data")."/trust"` (NeoVim-only):
+:" If the argument is omitted, defaults to `stdpath("data")."/trust"` (Neovim-only):
 :TrustSave ~/.local/share/trust.vim
 ```
 

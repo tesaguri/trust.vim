@@ -65,7 +65,7 @@ load({base_path})                                               *trust.load()*
                                  table with `allow` and `deny` keys, each of
                                  whose value is a string of the path to a
                                  status file. Defaults to
-                                 `stdpath("data")."/trust"` (requires NeoVim).
+                                 `stdpath("data")."/trust"` (requires Neovim).
 
 remove({path})                                                *trust.remove()*
                 Removes the marker of (dis)trust of a path if it has been
@@ -83,7 +83,7 @@ save({base_path})                                               *trust.save()*
                                  table with `allow` and `deny` keys, each of
                                  whose value is a string of the path to save
                                  the status file. Defaults to
-                                 `stdpath("data")."/trust"` (requires NeoVim).
+                                 `stdpath("data")."/trust"` (requires Neovim).
 
 set({path}, {status})                                            *trust.set()*
                 Sets the raw trust status of a path.

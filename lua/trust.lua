@@ -105,7 +105,7 @@ local load = vim.funcref("trust#load")
 ---@param base_path string|table|nil String of the path to a directory
 --- containing the status files or a table with `allow` and `deny` keys, each of
 --- whose value is a string of the path to a status file.
---- Defaults to `stdpath("data")."/trust"` (requires NeoVim).
+--- Defaults to `stdpath("data")."/trust"` (requires Neovim).
 function trust.load(base_path)
   validate_base_path(base_path)
   load(base_path)
@@ -118,7 +118,7 @@ local save = vim.funcref("trust#save")
 ---@param base_path string|table|nil String of the path to a directory to save the
 --- status files in or a table with `allow` and `deny` keys, each of whose value
 --- is a string of the path to save the status file.
---- Defaults to `stdpath("data")."/trust"` (requires NeoVim).
+--- Defaults to `stdpath("data")."/trust"` (requires Neovim).
 function trust.save(base_path)
   validate_base_path(base_path)
   save(base_path)

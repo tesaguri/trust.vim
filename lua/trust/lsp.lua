@@ -1,4 +1,4 @@
--- Utilities for controlling NeoVim's `vim.lsp` attach behavior based on the
+-- Utilities for controlling Neovim's `vim.lsp` attach behavior based on the
 -- workspaces' trust statuses.
 
 ---@private

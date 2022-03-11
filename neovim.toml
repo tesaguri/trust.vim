@@ -13,7 +13,7 @@ type = "string"
 [[vim.command.args]]
 type = "string"
 
-# NeoVim-specific globals:
+# Neovim-specific globals:
 
 [[vim.cmd.args]]
 type = "string"
