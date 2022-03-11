@@ -2,3 +2,6 @@ std = "neovim"
 
 [rules]
 shadowing = "allow"
+
+[config]
+empty_if = { comments_count = true }

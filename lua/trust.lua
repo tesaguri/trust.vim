@@ -87,11 +87,14 @@ end
 
 ---@private
 local function validate_base_path(base_path)
-  if
-    type(base_path) ~= "string"
-    and type(base_path) ~= "table"
-    and base_path ~= nil
-  then
+  if type(base_path) == "string" or base_path == nil then
+    -- ok
+  elseif type(base_path) ~= "table" then
+    validate {
+      ["base_path.allow"] = { base_path.allow, "string", true },
+      ["base_path.deny"] = { base_path.deny, "string", true },
+    }
+  else
     error("base_path: expected string|table|nil, got " .. type(base_path), 2)
   end
 end
