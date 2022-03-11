@@ -239,7 +239,7 @@ hook_start_client()                            *trust.lsp.hook_start_client()*
 
 last_root_dir                                        *trust.lsp.last_root_dir*
                 The value of `root_dir` config key that were passed in the
-                last call of the hooked version of `vim.lsp.start_client` .
+                last call of the hooked version of `vim.lsp.start_client`.
 
 safe_servers                                          *trust.lsp.safe_servers*
                 Handle of a set of servers that are run regardless of the
@@ -273,7 +273,7 @@ safe_servers_array()                          *trust.lsp.safe_servers_array()*
 
 safe_servers_pairs()                          *trust.lsp.safe_servers_pairs()*
                 Returns an iterator function that, each time it is called,
-                returns the name of a |safe_servers| and `true` .
+                returns the name of a |safe_servers| and `true`.
 
                 Return: ~
                     function An iterator over safe server's names.
