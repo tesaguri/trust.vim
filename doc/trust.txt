@@ -87,6 +87,40 @@ database with the contents of the files. For example:
     trust.deny(expand("~/workspace/forks"))
 <
 ==============================================================================
+COMMANDS                                                      *trust-commands*
+
+                                                                 *:TrustAllow*
+:TrustAllow {path} ..	Marks {path} as trusted.
+
+                                                                  *:TrustDeny*
+:TrustDeny {path} ..	Marks {path} as distrusted.
+
+                                                                *:TrustRemove*
+:TrustRemove {path} ..	Removes the marker of (dis)trust of {path} if it has
+			been marked with |:TrustAllow| or |:TrustDeny|.
+
+:TrustLoad [{base_path}]                                          *:TrustLoad*
+			Loads trust statuses from files under {base_path} or
+			`stdpath("data")."/trust"` if {base_path} is omitted.
+
+:TrustSave [{base_path}]                                          *:TrustSave*
+			Saves the on-memory trust statuses into files under
+			{base_path} or `stdpath("data")."/trust"` if
+			{base_path} is omitted.
+
+                                                           *:TrustListAllowed*
+:TrustListAllowed	Prints the list of paths which have been marked as
+			trusted.
+
+                                                            *:TrustListDenied*
+:TrustListDenied	Prints the list of paths which have been marked as
+			distrusted.
+
+                                                        *:TrustAllowWorkspace*
+:TrustAllowWorkspace	Marks the `root_dir` of the last invocation of
+			`vim.lsp.start_client`.
+
+==============================================================================
 Lua module: trust                                                  *lua-trust*
 
 allow({path})                                                  *trust.allow()*
