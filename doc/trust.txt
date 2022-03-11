@@ -1,8 +1,91 @@
-*trust.vim*  A poor imitation of Workspace Trust.
+*trust.txt*  A poor imitation of Workspace Trust.
+
+Author: Daiki "tesaguri" Mizukami <tesaguriguma@gmail.com>
+License: Apache-2.0 OR MIT
+
+See `LICENSE-APECHE` and `LICENSE-MIT` files distributed with the plugin for
+the exact license terms.
+
+                           In Neovim, type |gO| to see the table of contents.
 
 ==============================================================================
-TODO
+INTRODUCTION                                              *trust-introduction*
 
+`trust.vim` is a plugin that provides utilities for managing "trusted" paths
+like in Visual Studio Code's Workspace Trust feature. It also comes with an
+integration with Neovim's builtin `vim.lsp` framework, preventing language
+servers from running on untrusted workspaces.
+
+==============================================================================
+USAGE                                                            *trust-usage*
+
+To get started, add a configuration like the following in your `init.lua`:
+>
+    local trust = require("trust")
+    local expand = vim.fn.expand
+
+    -- List of (dis)trusted directories.
+    -- This example trusts directories under `~/workspace`
+    -- except for those under `forks` directory:
+    trust.allow(expand("~/workspace"))
+    trust.deny(expand("~/workspace/forks"))
+    trust.allow(expand("~/workspace/forks/some-thirdparty-repo-you-trust")
+    -- ...
+
+    -- Settings for Neovim's builtin `vim.lsp` framework follows:
+    local trust_lsp = require("trust.lsp")
+
+    -- List of servers that are safe to run in arbitrary directory:
+    trust_lsp.safe_servers = { "dhall_lsp_server" }
+
+    -- Call the following function to make `vim.lsp.start_client` respect
+    -- the above settings:
+    trust_lsp.hook_start_client()
+<
+Or in `init.vim`:
+>
+    call trust#allow(expand("~/workspace"))
+    call trust#deny(expand("~/workspace/forks"))
+    " ...
+
+    call trust#lsp#set_safe_servers(["dhall_lsp_server"])
+
+    call trust#lsp#hook_start_client()
+<
+Don't want to write new repository in the vimrc each and every time? You can
+also store and load the trust database from a directory. First, create the
+database files with Ex commands:
+>
+    :" Mark the current directory as trusted,
+    :" temporarily until the editor exits:
+    :TrustAllow .
+    :" Temporarily mark a directory as distrusted:
+    :TrustDeny ./thirdparty
+    :" Save the temporary trust database to files. If the argument is omitted,
+    :" defaults to `stdpath("data")."/trust"` (Neovim-only):
+    :TrustSave ~/.local/share/trust.vim
+<
+and replace the list of trusted directories in the `init.lua` with the
+following:
+>
+    require("trust").load()
+
+Or in `init.vim`:
+>
+    call trust#load()
+<
+If you want to write some trusted directories in the vimrc while keeping
+others from it, be sure to write the list of directories _after_ calling the
+`load()` function. Otherwise, the function will overwrite the on-memory trust
+database with the contents of the files. For example:
+>
+    local trust = require("trust")
+    local expand = vim.fn.expand
+    trust.load()
+
+    trust.allow(expand("~/workspace"))
+    trust.deny(expand("~/workspace/forks"))
+<
 ==============================================================================
 Lua module: trust                                                  *lua-trust*
 
