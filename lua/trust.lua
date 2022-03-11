@@ -161,7 +161,7 @@ local f = vim.funcref("trust#workspaces")
 --- If the trust status is modified between the iterator function calls, its
 --- return value is unspecified.
 ---
----@return function An iterator over (dis)trusted paths and their trust status.
+---@return table List of (dis)trusted paths.
 function trust.workspaces()
   return f()
 end

@@ -189,8 +189,7 @@ workspaces()                                              *trust.workspaces()*
                 calls, its return value is unspecified.
 
                 Return: ~
-                    function An iterator over (dis)trusted paths and their
-                    trust status.
+                    table List of (dis)trusted paths.
 
 
 ==============================================================================
