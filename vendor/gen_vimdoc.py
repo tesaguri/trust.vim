@@ -88,10 +88,7 @@ CONFIG = {
             'trust.lua',
             'lsp.lua',
         ],
-        'files': ' '.join([
-            os.path.join(base_dir, 'lua/trust.lua'),
-            os.path.join(base_dir, 'lua/trust/lsp.lua'),
-        ]),
+        'files': os.path.join(base_dir, 'lua/'),
         'file_patterns': '*.lua',
         'item_name_prefix': '',
         'section_name': {},
