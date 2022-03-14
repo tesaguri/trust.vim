@@ -14,9 +14,9 @@ let s:tree = {}
 
 function s:IsAbsolute(path)
   if s:use_drive_letter
-    return a:path =~ '^[A-Za-z]:'
+    return a:path =~? '^[A-Z]:'
   else
-    return a:path[0] == s:sep
+    return a:path[0] is# s:sep
   endif
 endfunction
 
@@ -30,12 +30,12 @@ function s:PathComponents(path) abort
   let l:path = substitute(resolve(l:path), s:sep.s:sep.s:sep.'*', s:sep, 'g')
 
   " Remove trailing path separator.
-  if l:path[-1:] == s:sep
+  if l:path[-1:] is# s:sep
     let l:path = l:path[0:-2]
   endif
 
-  if s:use_drive_letter && l:path =~ '^[a-z]'
-    let l:path = toupper(l:path[0)).l:path[1:]
+  if s:use_drive_letter && l:path =~# '^[a-z]'
+    let l:path = toupper(l:path[0]).l:path[1:]
   endif
 
   return split(l:path, s:sep)
@@ -81,7 +81,7 @@ function trust#deny(path) abort
 endfunction
 
 function trust#set(path, status) abort
-  if type(a:status) == 7
+  if type(a:status) is# 7
     return trust#remove(a:path)
   else
     let l:node = s:Dig(a:path)
@@ -93,7 +93,7 @@ endfunction
 
 function trust#remove(path) abort
   let l:node = s:GetNode(a:path)
-  if type(l:node) == v:t_dict
+  if type(l:node) is# v:t_dict
     let l:original = get(l:node, s:trust_key, v:null)
     call remove(l:node, s:trust_key)
     return l:original
@@ -107,15 +107,15 @@ endfunction
 " Persistent storage management:
 
 function s:FilePaths(base_path = v:null) abort
-  if type(a:base_path) == 7
+  if type(a:base_path) is# 7
     let l:base_path = stdpath('data')
   else
     let l:base_path = a:base_path
   endif
 
-  if type(l:base_path) == v:t_string
+  if type(l:base_path) is# v:t_string
     return [l:base_path.s:sep.'allow.txt', l:base_path.s:sep.'deny.txt']
-  elseif type(l:base_path) == v:t_dict
+  elseif type(l:base_path) is# v:t_dict
     return [
           \has_key(l:base_path, 'allow') ? l:base_path.allow : stdpath('data').s:sep.'allow.txt',
           \has_key(l:base_path, 'deny') ? l:base_path.deny : stdpath('data').s:sep.'deny.txt',
@@ -158,7 +158,7 @@ endfunction
 function trust#save(base_path) abort
   let [l:allowfile, l:denyfile] = s:FilePaths(a:base_path)
 
-  if type(a:base_path) == v:t_string
+  if type(a:base_path) is# v:t_string
     call mkdir(a:base_path, 'p')
   endif
 
@@ -179,7 +179,7 @@ function trust#is_allowed(path) abort
       let l:status = get(l:node, s:trust_key)
       if l:status
         let l:ret = v:true
-      elseif type(l:status) == v:t_bool
+      elseif type(l:status) is# v:t_bool
         let l:ret = v:false
       endif
     else
@@ -192,7 +192,7 @@ endfunction
 
 function trust#get(path) abort
   let l:node = s:GetNode(a:path)
-  if type(l:node) == v:t_dict
+  if type(l:node) is# v:t_dict
     return get(l:node, s:trust_key, v:null)
   else
     return v:null
@@ -201,7 +201,7 @@ endfunction
 
 function s:Walk(node, path, allowlist, denylist) abort
   if has_key(a:node, s:trust_key)
-    let l:path = a:path == '' ? s:sep : a:path
+    let l:path = a:path is# '' ? s:sep : a:path
     if a:node[s:trust_key]
       call add(a:allowlist, l:path)
     else

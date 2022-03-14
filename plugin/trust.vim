@@ -36,10 +36,10 @@ function s:TrustDeny(path, ...)
   call trust#deny(expand(a:path))
   if a:0 > 0
     for l:path in a:000
-      trust#deny(expand(l:path))
+      call trust#deny(expand(l:path))
     endfor
     call s:Echo(
-      \[['Distrusted '], [string(a:0 + 1), 'Number'], [' paths'], 1, {}
+      \[['Distrusted '], [string(a:0 + 1), 'Number'], [' paths']], 1, {}
       \)
   endif
 endfunction
@@ -49,7 +49,7 @@ command -nargs=+ -complete=dir TrustDeny call s:TrustDeny(<f-args>)
 function s:TrustRemove(path, ...)
   call trust#remove(expand(a:path))
   for l:path in a:000
-    trust#remove(expand(l:path))
+    call trust#remove(expand(l:path))
   endfor
 endfunction
 
