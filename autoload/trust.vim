@@ -42,8 +42,8 @@ function s:PathComponents(path) abort
 endfunction
 
 " Get the tree node for a path.
-function s:GetNode(path, node = s:tree) abort
-  let l:node = a:node
+function s:GetNode(path) abort
+  let l:node = s:tree
   for l:comp in s:PathComponents(a:path)
     if !has_key(l:node, l:comp)
       return
@@ -55,7 +55,7 @@ function s:GetNode(path, node = s:tree) abort
 endfunction
 
 " Gets the tree node for a path, creating a new node if one does not exist.
-function s:Dig(path, node = s:tree) abort
+function s:Dig(path, node) abort
   let l:node = a:node
   for l:comp in s:PathComponents(a:path)
     if has_key(l:node, l:comp)
@@ -84,7 +84,7 @@ function trust#set(path, status) abort
   if type(a:status) is# 7
     return trust#remove(a:path)
   else
-    let l:node = s:Dig(a:path)
+    let l:node = s:Dig(a:path, s:tree)
     let l:original = get(l:node, s:trust_key, v:null)
     let l:node[s:trust_key] = a:status
     return l:original
@@ -106,11 +106,11 @@ endfunction
 
 " Persistent storage management:
 
-function s:FilePaths(base_path = v:null) abort
-  if type(a:base_path) is# 7
+function s:FilePaths(...) abort
+  if a:0 is# 0 || type(a:1) is# 7
     let l:base_path = stdpath('data')
   else
-    let l:base_path = a:base_path
+    let l:base_path = a:1
   endif
 
   if type(l:base_path) is# v:t_string
@@ -131,8 +131,12 @@ function s:ReadfileIfReadable(filename) abort
   endif
 endfunction
 
-function trust#load(base_path) abort
-  let [l:allowfile, l:denyfile] = s:FilePaths(a:base_path)
+function trust#load(...) abort
+  if a:0 >=# 2
+    throw 'Too many arguments for function: trust#load'
+  endif
+
+  let [l:allowfile, l:denyfile] = call('s:FilePaths', a:000)
 
   let l:new_tree = {}
 
@@ -155,11 +159,18 @@ function trust#load(base_path) abort
   let s:tree = l:new_tree
 endfunction
 
-function trust#save(base_path) abort
-  let [l:allowfile, l:denyfile] = s:FilePaths(a:base_path)
+function trust#save(...) abort
+  if a:0 >=# 2
+    throw 'Too many arguments for function: trust#save'
+  endif
 
-  if type(a:base_path) is# v:t_string
-    call mkdir(a:base_path, 'p')
+
+  let [l:allowfile, l:denyfile] = call('s:FilePaths', a:000)
+
+  if a:0 is# 0
+    call mkdir(stdpath('data').s:sep.'trust')
+  elseif type(a:1) is# v:t_string
+    call mkdir(a:1, 'p')
   endif
 
   let [l:allowlist, l:denylist] = trust#workspaces()

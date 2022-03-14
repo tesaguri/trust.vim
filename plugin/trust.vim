@@ -55,16 +55,8 @@ endfunction
 
 command -nargs=+ -complete=dir TrustRemove call s:TrustRemove(<f-args>)
 
-function s:ExpandIfAny(path)
-  if a:path
-    return expand(a:path)
-  else
-    return a:path
-  endif
-endfunction
-
-function s:TrustLoad(base_path = v:null)
-  call trust#load(s:ExpandIfAny(a:base_path))
+function s:TrustLoad(...)
+  call call('trust#load', map(a:000, {_, base_path -> expand(base_path)}))
 endfunction
 
 if exists('*stdpath')
@@ -73,8 +65,8 @@ else
   command -nargs=1 -complete=dir TrustLoad call s:TrustLoad(<f-args>)
 endif
 
-function s:TrustSave(base_path = v:null)
-  call trust#save(s:ExpandIfAny(a:base_path))
+function s:TrustSave(...)
+  call call('trust#save', map(a:000, {_, base_path -> expand(base_path)}))
 endfunction
 
 if exists('*stdpath')
