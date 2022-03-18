@@ -81,17 +81,9 @@ function s:ListWorkspaces(workspaces)
   endfor
 endfunction
 
-function s:TrustListAllowed()
-  call s:ListWorkspaces(trust#workspaces()[0])
-endfunction
+command TrustListAllowed call s:ListWorkspaces(trust#workspaces()[0])
 
-command TrustListAllowed call s:TrustListAllowed()
-
-function s:TrustListDenied()
-  call s:ListWorkspaces(trust#workspaces()[1])
-endfunction
-
-command TrustListDenied call s:TrustListDenied()
+command TrustListDenied call s:ListWorkspaces(trust#workspaces()[1])
 
 if exists('*luaeval') && !luaeval('not vim.lsp')
   function s:TrustAllowWorkspace()
