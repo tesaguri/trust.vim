@@ -29,9 +29,17 @@ jobs:
           unzip "selene-$VERSION-linux.zip"
           install -c -m 755 selene /usr/local/bin/selene
       - run: selene lua
-      - name: selene test
+      - name: selene test/
         run: selene .
         working-directory: test
+
+  vint:
+    name: Lint with Vint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - run: pip install vim-vint
+      - run: make vint
 
   test:
     name: Test

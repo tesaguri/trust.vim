@@ -12,7 +12,7 @@ let s:trust_key = s:sep.'trust'
 " A tree representing the file system and storing trust statuses of workspaces.
 let s:tree = {}
 
-function s:IsAbsolute(path)
+function! s:IsAbsolute(path) abort
   if s:use_drive_letter
     return a:path =~? '^[A-Z]:'
   else
@@ -20,7 +20,7 @@ function s:IsAbsolute(path)
   endif
 endfunction
 
-function s:PathComponents(path) abort
+function! s:PathComponents(path) abort
   if s:IsAbsolute(a:path)
     let l:path = a:path
   else
@@ -42,7 +42,7 @@ function s:PathComponents(path) abort
 endfunction
 
 " Get the tree node for a path.
-function s:GetNode(path) abort
+function! s:GetNode(path) abort
   let l:node = s:tree
   for l:comp in s:PathComponents(a:path)
     if !has_key(l:node, l:comp)
@@ -55,7 +55,7 @@ function s:GetNode(path) abort
 endfunction
 
 " Gets the tree node for a path, creating a new node if one does not exist.
-function s:Dig(path, node) abort
+function! s:Dig(path, node) abort
   let l:node = a:node
   for l:comp in s:PathComponents(a:path)
     if has_key(l:node, l:comp)
@@ -72,15 +72,15 @@ endfunction
 
 " Trust management:
 
-function trust#allow(path) abort
+function! trust#allow(path) abort
   call trust#set(a:path, v:true)
 endfunction
 
-function trust#deny(path) abort
+function! trust#deny(path) abort
   call trust#set(a:path, v:false)
 endfunction
 
-function trust#set(path, status) abort
+function! trust#set(path, status) abort
   if type(a:status) is# 7
     return trust#remove(a:path)
   else
@@ -91,7 +91,7 @@ function trust#set(path, status) abort
   endif
 endfunction
 
-function trust#remove(path) abort
+function! trust#remove(path) abort
   let l:node = s:GetNode(a:path)
   if type(l:node) is# v:t_dict
     let l:original = get(l:node, s:trust_key, v:null)
@@ -100,13 +100,13 @@ function trust#remove(path) abort
   endif
 endfunction
 
-function trust#clear()
+function! trust#clear() abort
   let s:tree = {}
 endfunction
 
 " Persistent storage management:
 
-function s:FilePaths(...) abort
+function! s:FilePaths(...) abort
   if a:0 is# 0 || type(a:1) is# 7
     let l:base_path = stdpath('data')
   else
@@ -123,7 +123,7 @@ function s:FilePaths(...) abort
   endif
 endfunction
 
-function s:ReadfileIfReadable(filename) abort
+function! s:ReadfileIfReadable(filename) abort
   if filereadable(a:filename)
     return readfile(a:filename, 'b')
   else
@@ -131,7 +131,7 @@ function s:ReadfileIfReadable(filename) abort
   endif
 endfunction
 
-function trust#load(...) abort
+function! trust#load(...) abort
   if a:0 >=# 2
     throw 'Too many arguments for function: trust#load'
   endif
@@ -159,7 +159,7 @@ function trust#load(...) abort
   let s:tree = l:new_tree
 endfunction
 
-function trust#save(...) abort
+function! trust#save(...) abort
   if a:0 >=# 2
     throw 'Too many arguments for function: trust#save'
   endif
@@ -180,7 +180,7 @@ endfunction
 
 " Trust query:
 
-function trust#is_allowed(path) abort
+function! trust#is_allowed(path) abort
   let l:node = s:tree
   let l:ret = get(l:node, s:trust_key, v:false)
 
@@ -201,7 +201,7 @@ function trust#is_allowed(path) abort
   return l:ret
 endfunction
 
-function trust#get(path) abort
+function! trust#get(path) abort
   let l:node = s:GetNode(a:path)
   if type(l:node) is# v:t_dict
     return get(l:node, s:trust_key, v:null)
@@ -210,7 +210,7 @@ function trust#get(path) abort
   endif
 endfunction
 
-function s:Walk(node, path, allowlist, denylist) abort
+function! s:Walk(node, path, allowlist, denylist) abort
   if has_key(a:node, s:trust_key)
     let l:path = a:path is# '' ? s:sep : a:path
     if a:node[s:trust_key]
@@ -228,7 +228,7 @@ function s:Walk(node, path, allowlist, denylist) abort
   endfor
 endfunction
 
-function trust#workspaces() abort
+function! trust#workspaces() abort
   let l:allowlist = []
   let l:denylist = []
   call s:Walk(s:tree, '', l:allowlist, l:denylist)
