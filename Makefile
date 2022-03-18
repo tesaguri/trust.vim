@@ -22,4 +22,4 @@ selene:
 	cd test && selene .
 
 vint:
-	vint --warning --verbose autoload/{trust/,trust.vim} plugin/
+	vint --warning --verbose autoload/trust.vim autoload/trust/ plugin/
