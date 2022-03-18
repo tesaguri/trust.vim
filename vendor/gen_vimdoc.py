@@ -88,7 +88,7 @@ CONFIG = {
             'trust.lua',
             'lsp.lua',
         ],
-        'files': os.path.join(base_dir, 'lua/'),
+        'files': ['lua/'],
         'file_patterns': '*.lua',
         'item_name_prefix': '',
         'section_name': {},
@@ -703,7 +703,8 @@ def extract_from_xml(filename, target, width):
                            desc.toprettyxml(indent='  ', newl='\n')), ' ' * 16))
 
         if fmt_vimhelp:
-            item['desc_node'] = desc  # HACK :(
+            # HACK :(
+            item['desc_node'] = desc
             item['brief_desc_node'] = brief_desc
 
         for m in paras:
@@ -854,7 +855,8 @@ def main(config, args):
                 stderr=(subprocess.STDOUT if debug else subprocess.DEVNULL))
         p.communicate(
             config.format(
-                input=CONFIG[target]['files'],
+                input=' '.join(
+                    [f'"{file}"' for file in CONFIG[target]['files']]),
                 output=output_dir,
                 filter=filter_cmd,
                 file_patterns=CONFIG[target]['file_patterns'])
@@ -944,7 +946,7 @@ def main(config, args):
             raise RuntimeError(
                 'found new modules "{}"; update the "section_order" map'.format(
                     set(sections).difference(CONFIG[target]['section_order'])))
-        section_start_token = sections[CONFIG[target]['section_order'][0]][1]
+        first_section_tag = sections[CONFIG[target]['section_order'][0]][1]
 
         docs = ''
 
@@ -970,7 +972,7 @@ def main(config, args):
         doc_file = os.path.join(base_dir, 'doc', CONFIG[target]['filename'])
 
         if os.path.exists(doc_file):
-            delete_lines_below(doc_file, section_start_token)
+            delete_lines_below(doc_file, first_section_tag)
         with open(doc_file, 'ab') as fp:
             fp.write(docs.encode('utf8'))
 
