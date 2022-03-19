@@ -2,6 +2,13 @@ if not vim.lsp then
   return true
 end
 
+-- selene: allow(undefined_variable)
+local assert_eq = assert_eq
+-- selene: allow(undefined_variable)
+local root = root
+-- selene: allow(undefined_variable)
+local path = path
+
 local trust = require("trust")
 local lsp = require("trust.lsp")
 

@@ -1,6 +1,5 @@
 --# selene: allow(unused_variable)
 --# selene: allow(unscoped_variables)
---# selene: deny(undefined_variable)
 
 print(_VERSION)
 if jit then
@@ -44,6 +43,8 @@ else
     return table.concat(comps, "/")
   end
 end
+-- selene: allow(undefined_variable)
+local path = path
 
 function assert_eq(lhs, rhs)
   if lhs ~= rhs then
@@ -59,11 +60,13 @@ if scriptdir == "" then
   scriptdir = "."
 end
 
-cmd("set runtimepath^=" .. scriptdir .. "/..")
+cmd("set runtimepath^=" .. resolve(path { scriptdir, ".." }))
 cmd([[echo 'runtimepath: '.&runtimepath."\n"]])
 
 local success = true
-for chunk in values(glob(scriptdir .. "/lua/**/*.lua", false, true)) do
+for chunk in
+  values(glob(path { scriptdir .. "lua", "**", "*.lua" }, false, true))
+do
   cmd("echon 'Running " .. chunk .. " ... '")
   local result, skipped = xpcall(function()
     return dofile(chunk)

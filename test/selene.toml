@@ -2,4 +2,3 @@ std = "test"
 
 [rules]
 shadowing = "allow"
-undefined_variable = "allow"
