@@ -15,10 +15,10 @@ test-vim:
 lint: format selene vint
 
 format:
-	stylua --check lua test
+	stylua --check lua/ test/
 
 selene:
-	selene lua
+	selene lua/
 	cd test && selene .
 
 vint:

@@ -12,7 +12,7 @@ jobs:
         uses: JohnnyMorganz/stylua-action@1.0.0
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          args: --check lua test
+          args: --check lua/ test/
           version: '^0.12'
 
   selene:
@@ -28,7 +28,7 @@ jobs:
           sha256sum --check --strict <<< "$SHA256 selene-$VERSION-linux.zip"
           unzip "selene-$VERSION-linux.zip"
           install -c -m 755 selene /usr/local/bin/selene
-      - run: selene lua
+      - run: selene lua/
       - name: selene test/
         run: selene .
         working-directory: test
