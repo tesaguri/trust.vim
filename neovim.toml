@@ -13,6 +13,9 @@ type = "string"
 [[vim.command.args]]
 type = "string"
 
+[[vim.dict.args]]
+type = "table"
+
 # Neovim-specific globals:
 
 [[vim.cmd.args]]
@@ -44,6 +47,12 @@ type = "table"
 
 [[vim.tbl_keys.args]]
 type = "table"
+
+[vim.type_idx]
+property = true
+
+[vim.types.dictionary]
+property = true
 
 [[vim.validate.args]]
 type = "table"
