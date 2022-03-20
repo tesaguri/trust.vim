@@ -5,7 +5,7 @@ THEMIS_NAME ?= vim-themis/bin/themis
 test: test-nvim test-vim
 
 test-nvim:
-	THEMIS_VIM=$(NVIM_NAME) $(THEMIS_NAME)
+	THEMIS_ARGS='-e -s --headless' THEMIS_VIM=$(NVIM_NAME) $(THEMIS_NAME)
 
 test-vim:
 	THEMIS_VIM=$(VIM_NAME) $(THEMIS_NAME)
