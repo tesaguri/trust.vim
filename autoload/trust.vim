@@ -212,7 +212,9 @@ endfunction
 
 function! s:Walk(node, path, allowlist, denylist) abort
   if has_key(a:node, s:trust_key)
-    let l:path = a:path is# '' ? s:sep : a:path
+    let l:path = empty(a:path)
+      \ ? s:sep
+      \ : (s:use_drive_letter && len(a:path) is# 2 ? a:path.s:sep : a:path)
     if a:node[s:trust_key]
       call add(a:allowlist, l:path)
     else
@@ -222,7 +224,9 @@ function! s:Walk(node, path, allowlist, denylist) abort
 
   for [l:name, l:child] in items(a:node)
     if l:name[0] != s:sep
-      let l:child_path = a:path.s:sep.l:name
+      let l:child_path = empty(a:path) && s:use_drive_letter
+        \ ? l:name
+        \ : a:path.s:sep.l:name
       call s:Walk(l:child, l:child_path, a:allowlist, a:denylist)
     endif
   endfor
