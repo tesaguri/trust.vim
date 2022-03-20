@@ -81,7 +81,7 @@ function! trust#deny(path) abort
 endfunction
 
 function! trust#set(path, status) abort
-  if type(a:status) is# 7
+  if a:status is# v:null
     return trust#remove(a:path)
   else
     let l:node = s:Dig(a:path, s:tree)
@@ -107,7 +107,7 @@ endfunction
 " Persistent storage management:
 
 function! s:FilePaths(...) abort
-  if a:0 is# 0 || type(a:1) is# 7
+  if a:0 is# 0 || a:1 is# v:null
     let l:base_path = stdpath('data')
   else
     let l:base_path = a:1
