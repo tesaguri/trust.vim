@@ -21,6 +21,14 @@ else
 end
 
 ---@private
+local function from_vim(value)
+  if value == vim.NIL then
+    return nil
+  end
+  return value
+end
+
+---@private
 local allow = vim.funcref("trust#allow")
 --- Marks a path as trusted.
 ---
@@ -28,11 +36,11 @@ local allow = vim.funcref("trust#allow")
 --- distrusted, if any) will be trusted.
 ---
 ---@param path string The path to trust.
----@return boolean The original status value of the node before this function is
---- called.
+---@return boolean|nil The original status value of the node before this
+--- function is called.
 function trust.allow(path)
   validate { path = { path, "string" } }
-  return allow(path)
+  return from_vim(allow(path))
 end
 
 ---@private
@@ -43,11 +51,11 @@ local deny = vim.funcref("trust#deny")
 --- trusted, if any) will be untrusted.
 ---
 ---@param path string The path to distrust.
----@return boolean The original status value of the node before this function is
---- called.
+---@return boolean|nil The original status value of the node before this
+--- function is called.
 function trust.deny(path)
   validate { path = { path, "string" } }
-  return deny(path)
+  return from_vim(deny(path))
 end
 
 ---@private
@@ -57,11 +65,11 @@ local set = vim.funcref("trust#set")
 ---@param path string The path to set trust status.
 ---@param status boolean|nil Trust status value. `true` to trust, `false` to
 --- distrust, `nil` to unset.
----@return boolean The original status value of the node before this function is
---- called.
+---@return boolean|nil The original status value of the node before this
+--- function is called.
 function trust.set(path, status)
   validate { path = { path, "string" }, status = { status, "boolean", true } }
-  return set(path, status)
+  return from_vim(set(path, status))
 end
 
 ---@private
@@ -70,9 +78,11 @@ local remove = vim.funcref("trust#remove")
 --- |trust.allow()| or |trust.deny()|.
 ---
 ---@param path string The path to unmark.
+---@return boolean|nil The original status value of the node before this
+--- function is called.
 function trust.remove(path)
   validate { path = { path, "string" } }
-  return remove(path)
+  return from_vim(remove(path))
 end
 
 -- XXX: When a function with no arguments and a top-level variable have a same
@@ -149,7 +159,7 @@ local get = vim.funcref("trust#get")
 --- `false` if marked as distrusted, `nil` otherwise.
 function trust.get(path)
   validate { path = { path, "string" } }
-  return get(path)
+  return from_vim(get(path))
 end
 
 ---@private

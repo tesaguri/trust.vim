@@ -73,11 +73,11 @@ endfunction
 " Trust management:
 
 function! trust#allow(path) abort
-  call trust#set(a:path, v:true)
+  return trust#set(a:path, v:true)
 endfunction
 
 function! trust#deny(path) abort
-  call trust#set(a:path, v:false)
+  return trust#set(a:path, v:false)
 endfunction
 
 function! trust#set(path, status) abort
