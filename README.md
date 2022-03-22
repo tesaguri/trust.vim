@@ -35,11 +35,23 @@ or for Vim:
 git clone https://github.com/tesaguri/trust.vim.git "$HOME/.vim/pack/plugins/start/trust.vim"
 ```
 
-Usually however, you may want to manage the plugin with your favorite plugin manager, though I'm not
-going to enumerate installation instructions for every manager, most of which should be something
-like `AddOrPlugOrWhatever 'tesaguri/trust.vim'` in your vimrc. It is also recommended that you pin
-the package to a versioned branch (e.g. `v0.1` branch) because I may make changes to the plugin that
-break your vimrc in a new release.
+Usually however, you may want to manage the plugin with your favorite plugin manager. Here is an
+example for [`dein`][dein] (my favorite one). In your `init.lua`:
+
+```lua
+vim.fn['dein#add']("tesaguri/trust.vim", { rev = "v0.1" })
+```
+
+Or in `init.vim` (`vimrc`):
+
+```vim
+call dein#add('tesaguri/trust.vim', #{rev: 'v0.1'})
+```
+
+Setups for other package managers should also look like this.
+
+Pinning to a versioned branch like `v0.1` is recommended because `HEAD` may have changes that break
+your vimrc at any time.
 
 ## Setup
 
@@ -121,3 +133,4 @@ trust.deny(expand("~/workspace/forks"))
 See [`COPYING.md`](COPYING.md) file for copyright notices and license information.
 
 [vital]: <https://github.com/vim-jp/vital.vim>
+[dein]: <https://github.com/Shougo/dein.vim>
