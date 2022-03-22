@@ -3,8 +3,7 @@
 Author: Daiki "tesaguri" Mizukami <tesaguriguma@gmail.com>
 License: Apache-2.0 OR MIT
 
-See `LICENSE-APECHE` and `LICENSE-MIT` files distributed with the plugin for
-the exact license terms.
+See `COPYING.md` file distributed with the plugin for the exact license terms.
 
                            In Neovim, type |gO| to see the table of contents.
 
@@ -123,45 +122,6 @@ COMMANDS                                                      *trust-commands*
 ==============================================================================
 Lua module: trust                                                  *lua-trust*
 
-allow({path})                                                  *trust.allow()*
-                Marks a path as trusted.
-
-                Workspaces at the path or its descendants (up to a path
-                explicitly marked as distrusted, if any) will be trusted.
-
-                Parameters: ~
-                    {path}  string The path to trust.
-
-                Return: ~
-                    boolean The original status value of the node before this
-                    function is called.
-
-clear()                                                        *trust.clear()*
-                Clears the status of (dis)trust of all paths.
-
-deny({path})                                                    *trust.deny()*
-                Marks a path as distrusted.
-
-                Workspaces at the path or its descendants (up to a path
-                explicitly marked as trusted, if any) will be untrusted.
-
-                Parameters: ~
-                    {path}  string The path to distrust.
-
-                Return: ~
-                    boolean The original status value of the node before this
-                    function is called.
-
-get({path})                                                      *trust.get()*
-                Returns the raw trust status of a path.
-
-                Unlike |trust.is_allowed()|, this does not respect the trust
-                status of ancestor paths.
-
-                Return: ~
-                    boolean|nil `true` if the path is explicitly marked as
-                    trusted, `false` if marked as distrusted, `nil` otherwise.
-
 is_allowed({path})                                        *trust.is_allowed()*
                 Returns `true` if the path is trusted.
 
@@ -171,7 +131,62 @@ is_allowed({path})                                        *trust.is_allowed()*
                 Return: ~
                     boolean `true` if the path is trusted, `false` otherwise.
 
-load({base_path})                                               *trust.load()*
+trust                                                            *trust.trust*
+                TODO: Documentation
+
+
+==============================================================================
+Lua module: trust.path                                        *lua-trust.path*
+
+allow({path})                                             *trust.path.allow()*
+                Marks a path as trusted.
+
+                Workspaces at the path or its descendants (up to a path
+                explicitly marked as distrusted, if any) will be trusted.
+
+                Parameters: ~
+                    {path}  string The path to trust.
+
+                Return: ~
+                    boolean|nil The original status value of the node before
+                    this function is called.
+
+clear()                                                   *trust.path.clear()*
+                Clears the status of (dis)trust of all paths.
+
+deny({path})                                               *trust.path.deny()*
+                Marks a path as distrusted.
+
+                Workspaces at the path or its descendants (up to a path
+                explicitly marked as trusted, if any) will be untrusted.
+
+                Parameters: ~
+                    {path}  string The path to distrust.
+
+                Return: ~
+                    boolean|nil The original status value of the node before
+                    this function is called.
+
+get({path})                                                 *trust.path.get()*
+                Returns the raw trust status of a path.
+
+                Unlike |trust.is_allowed()|, this does not respect the trust
+                status of ancestor paths.
+
+                Return: ~
+                    boolean|nil `true` if the path is explicitly marked as
+                    trusted, `false` if marked as distrusted, `nil` otherwise.
+
+is_allowed({path})                                   *trust.path.is_allowed()*
+                Returns `true` if the path is trusted.
+
+                Parameters: ~
+                    {path}  string Path to a workspace.
+
+                Return: ~
+                    boolean `true` if the path is trusted, `false` otherwise.
+
+load({base_path})                                          *trust.path.load()*
                 Loads trust statuses from files.
 
                 Overwrites the on-memory trust statuses.
@@ -184,14 +199,18 @@ load({base_path})                                               *trust.load()*
                                  status file. Defaults to
                                  `stdpath("data")."/trust"` (requires Neovim).
 
-remove({path})                                                *trust.remove()*
+remove({path})                                           *trust.path.remove()*
                 Removes the marker of (dis)trust of a path if it has been
                 marked with |trust.allow()| or |trust.deny()|.
 
                 Parameters: ~
                     {path}  string The path to unmark.
 
-save({base_path})                                               *trust.save()*
+                Return: ~
+                    boolean|nil The original status value of the node before
+                    this function is called.
+
+save({base_path})                                          *trust.path.save()*
                 Saves the on-memory trust statuses into files.
 
                 Parameters: ~
@@ -202,7 +221,7 @@ save({base_path})                                               *trust.save()*
                                  the status file. Defaults to
                                  `stdpath("data")."/trust"` (requires Neovim).
 
-set({path}, {status})                                            *trust.set()*
+set({path}, {status})                                       *trust.path.set()*
                 Sets the raw trust status of a path.
 
                 Parameters: ~
@@ -211,10 +230,10 @@ set({path}, {status})                                            *trust.set()*
                               `false` to distrust, `nil` to unset.
 
                 Return: ~
-                    boolean The original status value of the node before this
-                    function is called.
+                    boolean|nil The original status value of the node before
+                    this function is called.
 
-workspaces()                                              *trust.workspaces()*
+workspaces()                                         *trust.path.workspaces()*
                 Returns the list of (dis)trusted workspaces as an array of
                 arrays, whose first element is a list of trusted workspaces
                 and the second is a list of distrusted workspaces.
@@ -224,6 +243,50 @@ workspaces()                                              *trust.workspaces()*
 
                 Return: ~
                     table List of (dis)trusted paths.
+
+
+==============================================================================
+Lua module: trust.git                                          *lua-trust.git*
+
+is_allowed({path})                                    *trust.git.is_allowed()*
+                TODO: Documentation
+
+is_dirty({path}, {...})                                 *trust.git.is_dirty()*
+                TODO: Documentation
+
+verify_commit({path})                              *trust.git.verify_commit()*
+                TODO: Documentation
+
+
+==============================================================================
+Lua module: trust.gpg                                          *lua-trust.gpg*
+
+expired                                                    *trust.gpg.expired*
+                TODO: Documentation
+
+full                                                          *trust.gpg.full*
+                TODO: Documentation
+
+marginal                                                  *trust.gpg.marginal*
+                TODO: Documentation
+
+min_validity()                                      *trust.gpg.min_validity()*
+                TODO: Documentation
+
+never                                                        *trust.gpg.never*
+                TODO: Documentation
+
+ultimate                                                  *trust.gpg.ultimate*
+                TODO: Documentation
+
+undefined                                                *trust.gpg.undefined*
+                TODO: Documentation
+
+unknown                                                    *trust.gpg.unknown*
+                TODO: Documentation
+
+validity({value})                                       *trust.gpg.validity()*
+                TODO: Documentation
 
 
 ==============================================================================

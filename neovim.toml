@@ -18,6 +18,9 @@ type = "table"
 
 # Neovim-specific globals:
 
+[vim.NIL]
+property = true
+
 [[vim.cmd.args]]
 type = "string"
 

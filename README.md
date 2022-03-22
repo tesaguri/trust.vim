@@ -1,5 +1,7 @@
 # trust.vim
 
+[![Powered by vital.vim](https://img.shields.io/badge/powered%20by-vital.vim-80273f.svg)][vital]
+
 A poor imitation of Workspace Trust™️ for Neovim/Vim.
 
 ## Overview
@@ -116,11 +118,6 @@ trust.deny(expand("~/workspace/forks"))
 
 ## License
 
-Copyright (c) 2022 Daiki "tesaguri" Mizukami
+See [`COPYING.md`](COPYING.md) file for copyright notices and license information.
 
-This project is licensed under either of:
-
-- The Apache License, Version 2.0 ([LICENSE-APACHE](LICENSE-APACHE) or <https://www.apache.org/licenses/LICENSE-2.0>), or
-- The MIT license ([LICENSE-MIT](LICENSE-MIT) or <https://opensource.org/licenses/MIT>)
-
-at your option.
+[vital]: <https://github.com/vim-jp/vital.vim>

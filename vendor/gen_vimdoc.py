@@ -86,6 +86,9 @@ CONFIG = {
         'filename': 'trust.txt',
         'section_order': [
             'trust.lua',
+            'path.lua',
+            'git.lua',
+            'gpg.lua',
             'lsp.lua',
         ],
         'files': ['lua/'],
