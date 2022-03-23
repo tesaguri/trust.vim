@@ -1,44 +1,20 @@
+let s:Filepath = vital#trust#import('System.Filepath')
+
 " Common utilities:
 
-if has('win32')
+if exists('+shellslash')
   let s:sep = '\'
-  let s:use_drive_letter = 1
 else
   let s:sep = '/'
-  let s:use_drive_letter = 0
 endif
+" Use the path separator in the tree node name to represent metadata.
 let s:trust_key = s:sep.'trust'
 
 " A tree representing the file system and storing trust statuses of workspaces.
 let s:tree = {}
 
-function! s:IsAbsolute(path) abort
-  if s:use_drive_letter
-    return a:path =~? '^[A-Z]:'
-  else
-    return a:path[0] is# s:sep
-  endif
-endfunction
-
 function! s:PathComponents(path) abort
-  if s:IsAbsolute(a:path)
-    let l:path = a:path
-  else
-    let l:path = getcwd().s:sep.a:path
-  endif
-
-  let l:path = substitute(resolve(l:path), s:sep.s:sep.s:sep.'*', s:sep, 'g')
-
-  " Remove trailing path separator.
-  if l:path[-1:] is# s:sep
-    let l:path = l:path[0:-2]
-  endif
-
-  if s:use_drive_letter && l:path =~# '^[a-z]'
-    let l:path = toupper(l:path[0]).l:path[1:]
-  endif
-
-  return split(l:path, s:sep)
+  return s:Filepath.split(resolve(s:Filepath.abspath(a:path)))
 endfunction
 
 " Get the tree node for a path.
@@ -114,11 +90,18 @@ function! s:FilePaths(...) abort
   endif
 
   if type(l:base_path) is# v:t_string
-    return [l:base_path.s:sep.'allow.txt', l:base_path.s:sep.'deny.txt']
+    return [
+      \s:Filepath.join(l:base_path, 'allow.txt'),
+      \s:Filepath.join(l:base_path, 'deny.txt'),
+      \]
   elseif type(l:base_path) is# v:t_dict
     return [
-          \has_key(l:base_path, 'allow') ? l:base_path.allow : stdpath('data').s:sep.'allow.txt',
-          \has_key(l:base_path, 'deny') ? l:base_path.deny : stdpath('data').s:sep.'deny.txt',
+          \has_key(l:base_path, 'allow')
+            \ ? l:base_path.allow
+            \ : s:Filepath.join(stdpath('data'), 'allow.txt'),
+          \has_key(l:base_path, 'deny')
+            \ ? l:base_path.deny
+            \ : s:Filepath.join(stdpath('data'), 'deny.txt'),
           \]
   endif
 endfunction
@@ -168,12 +151,16 @@ function! trust#path#save(...) abort
   let [l:allowfile, l:denyfile] = call('s:FilePaths', a:000)
 
   if a:0 is# 0
-    call mkdir(stdpath('data').s:sep.'trust')
+    call mkdir(s:Filepath.join(stdpath('data'), 'trust'))
   elseif type(a:1) is# v:t_string
     call mkdir(a:1, 'p')
   endif
 
+  let save_ssl = &shellslash
+  set noshellslash " Make the output stable regardless of `&shellslash`.
   let [l:allowlist, l:denylist] = trust#workspaces()
+  let &shellslash = save_ssl
+
   call writefile(l:allowlist, l:allowfile, 'b')
   call writefile(l:denylist, l:denyfile, 'b')
 endfunction
@@ -213,8 +200,10 @@ endfunction
 function! s:Walk(node, path, allowlist, denylist) abort
   if has_key(a:node, s:trust_key)
     let l:path = empty(a:path)
-      \ ? s:sep
-      \ : (s:use_drive_letter && len(a:path) is# 2 ? a:path.s:sep : a:path)
+      \ ? s:Filepath.separator()
+      \ : (len(a:path) is# 2 && exists('+shellslash')
+        \ ? a:path.s:Filepath.separator()
+        \ : a:path)
     if a:node[s:trust_key]
       call add(a:allowlist, l:path)
     else
@@ -223,10 +212,11 @@ function! s:Walk(node, path, allowlist, denylist) abort
   endif
 
   for [l:name, l:child] in items(a:node)
+    " If the name starts with the path separator, it is metadata.
     if l:name[0] != s:sep
-      let l:child_path = empty(a:path) && s:use_drive_letter
+      let l:child_path = empty(a:path) && exists('+shellslash')
         \ ? l:name
-        \ : a:path.s:sep.l:name
+        \ : s:Filepath.join(a:path, l:name)
       call s:Walk(l:child, l:child_path, a:allowlist, a:denylist)
     endif
   endfor
