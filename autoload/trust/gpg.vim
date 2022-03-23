@@ -1,3 +1,6 @@
+let s:save_cpo = &cpo
+set cpo&vim
+
 let g:trust#gpg#never = -5
 let g:trust#gpg#revoked = -4
 let g:trust#gpg#expired = -3
@@ -62,3 +65,6 @@ function! trust#gpg#min_validity() abort
     return s:validities.MARGINAL
   endif
 endfunction
+
+let &cpo = s:save_cpo
+unlet s:save_cpo

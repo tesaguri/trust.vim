@@ -1,3 +1,6 @@
+let s:save_cpo = &cpo
+set cpo&vim
+
 let s:Promise = vital#trust#import('Async.Promise')
 let s:Job = vital#trust#import('System.Job')
 
@@ -182,3 +185,6 @@ function! trust#git#is_dirty(path, ...) abort
     return call('s:is_dirty', [a:path, {}])
   endif
 endfunction
+
+let &cpo = s:save_cpo
+unlet s:save_cpo

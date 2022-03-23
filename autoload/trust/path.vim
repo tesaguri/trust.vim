@@ -1,3 +1,6 @@
+let s:save_cpo = &cpo
+set cpo&vim
+
 let s:Filepath = vital#trust#import('System.Filepath')
 
 " Common utilities:
@@ -228,3 +231,6 @@ function! trust#path#workspaces() abort
   call s:Walk(s:tree, '', l:allowlist, l:denylist)
   return [l:allowlist, l:denylist]
 endfunction
+
+let &cpo = s:save_cpo
+unlet s:save_cpo

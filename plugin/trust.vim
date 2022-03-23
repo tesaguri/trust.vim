@@ -3,6 +3,9 @@ if exists('g:loaded_trust')
 endif
 let g:loaded_trust = 1
 
+let s:save_cpo = &cpo
+set cpo&vim
+
 if exists('*nvim_echo')
   let s:Echo = function('nvim_echo')
 else
@@ -103,3 +106,6 @@ if exists('*luaeval') && !luaeval('not vim.lsp')
 
   command TrustAllowWorkspace call s:TrustAllowWorkspace()
 endif
+
+let &cpo = s:save_cpo
+unlet s:save_cpo

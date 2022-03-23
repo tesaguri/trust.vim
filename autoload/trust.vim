@@ -1,3 +1,6 @@
+let s:save_cpo = &cpo
+set cpo&vim
+
 if !exists('g:trust#sources')
   let g:trust#sources = ['trust#path#is_allowed']
 endif
@@ -48,3 +51,6 @@ endfunction
 function! trust#workspaces(...) abort
   return call('trust#path#workspaces', a:000)
 endfunction
+
+let &cpo = s:save_cpo
+unlet s:save_cpo

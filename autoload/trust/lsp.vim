@@ -1,3 +1,6 @@
+let s:save_cpo = &cpo
+set cpo&vim
+
 function! trust#lsp#hook_start_client() abort
   return luaeval('require("trust.lsp").hook_start_client()')
 endfunction
@@ -34,3 +37,6 @@ endfunction
 function! trust#lsp#last_root_dir() abort
   return luaeval('require("trust.lsp").last_root_dir')
 endfunction
+
+let &cpo = s:save_cpo
+unlet s:save_cpo
