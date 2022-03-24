@@ -88,22 +88,20 @@ function! s:ParseValidity(line) abort
 endfunction
 
 function! trust#git#is_allowed(path) abort
-  let l:validity = trust#git#verify_commit(a:path)
+  let l:promise = trust#git#verify_commit(a:path)
+    \.catch({-> trust#gpg#validity('ERR')})
+    \.then({validity -> validity >=# trust#gpg#min_validity()
+      \ ? 0
+      \ : Promise.reject(1)
+      \})
   " vint: next-line -ProhibitUsingUndeclaredVariable
-  if s:allow_dirty()
-    let l:is_dirty = 0
-  else
+  if !s:allow_dirty()
     let l:dirty = trust#git#is_dirty(a:path)
-    let [l:is_dirty, l:err] = s:Promise.wait(l:dirty)
-    if l:is_dirty || l:err
-      return 0
-    endif
+      \.then({status -> status ? s:Promise.reject(1) : 0})
+    let l:promise = Promise.all([l:promise, l:dirty])
   endif
-  let [l:validity, l:err] = s:Promise.wait(l:validity)
-  if l:err
-    let l:validity = trust#gpg#validity('ERR')
-  endif
-  return l:validity >=# trust#gpg#min_validity()
+  let [_, l:err] = s:Promise.wait(l:promise)
+  return l:err is# v:null
 endfunction
 
 function! trust#git#verify_commit(path) abort
@@ -130,7 +128,7 @@ function! trust#git#verify_commit(path) abort
     \'on_stderr': funcref('s:on_stderr'),
     \'on_exit': {status -> status
       \ ? Reject(status)
-      \ : (l:validity is# v:null ? Reject(v:null) : Resolve(l:validity))},
+      \ : (l:validity is# v:null ? Reject(-1) : Resolve(l:validity))},
     \})})
   return l:promise
 endfunction
