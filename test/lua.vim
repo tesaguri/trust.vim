@@ -1,6 +1,6 @@
 let s:Filepath = vital#trust#import('System.Filepath')
 
-if exists('*luaeval')
+if exists(':lua') is# 2
   lua <<EOF
   print(_VERSION)
   if jit then
