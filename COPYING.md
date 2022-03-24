@@ -9,6 +9,10 @@ Copyright (c) 2022 Daiki "tesaguri" Mizukami
 
 at your option.
 
+Unless You explicitly state otherwise, any Contribution intentionally submitted for inclusion in
+trust.vim by You, as defined in the Apache License, shall be dual-licensed likewise, without any
+additional terms or conditions.
+
 Additionally, the project contains following thirdparty code with different license terms:
 
 ## vital-Whisky
