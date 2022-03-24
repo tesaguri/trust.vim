@@ -65,6 +65,28 @@ function! s:IsDirtyStatusLine(line) abort
   endif
 endfunction
 
+function! s:ParseValidity(line) abort
+  let l:match = matchlist(a:line, '^\[GNUPG:\] \%(TRUST_\([^ ]*\)\|\%(\(E\)XP\|\(R\)EV\)KEYSIG\>\)')
+  if !empty(l:match)
+    if !empty(l:match[1])
+      try
+        return trust#gpg#validity(l:match[1])
+      catch '^trust#gpg:INVALID_VALIDITY\>'
+        echohl WarningMsg
+        echomsg 'trust#git: Unknown validity status line: TRUST_'.l:match[1]
+        echohl None
+      endtry
+    elseif !empty(l:match[2])
+      return trust#gpg#validity('EXPIRED')
+    elseif !empty(l:match[3])
+      return trust#gpg#validity('REVOKED')
+    else
+      throw 'trust#git:UNREACHABLE: Reached unreachable code'
+    endif
+  endif
+  return v:null
+endfunction
+
 function! trust#git#is_allowed(path) abort
   let l:validity = trust#git#verify_commit(a:path)
   " vint: next-line -ProhibitUsingUndeclaredVariable
@@ -91,26 +113,15 @@ function! trust#git#verify_commit(path) abort
 
   let l:buf = ''
   function! s:on_stderr(data) abort closure
+    if l:validity isnot# v:null
+      return
+    endif
     let a:data[0] = a:data[0].l:buf
     let l:buf = remove(a:data, -1)
     for l:line in a:data
-      let l:match = matchlist(l:line, '^\[GNUPG:\] \%(TRUST_\([^ ]*\)\|\%(\(E\)XP\|\(R\)EV\)KEYSIG\>\)')
-      if !empty(l:match)
-        if !empty(l:match[1])
-          try
-            let l:validity = trust#gpg#validity(l:match[1])
-          catch '^trust#gpg:INVALID_VALIDITY\>'
-            echohl WarningMsg
-            echomsg 'trust#git: Unknown validity status line: TRUST_'.l:match[1]
-            echohl None
-          endtry
-        elseif !empty(l:match[2])
-          let l:validity = trust#gpg#validity('EXPIRED')
-        elseif !empty(l:match[3])
-          let l:validity = trust#gpg#validity('REVOKED')
-        else
-          throw 'trust#git:UNREACHABLE: Reached unreachable code'
-        endif
+      let l:validity = s:ParseValidity(l:line)
+      if l:validity isnot# v:null
+        return
       endif
     endfor
   endfunction
