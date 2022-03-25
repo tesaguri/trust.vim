@@ -1,41 +1,41 @@
 let s:save_cpo = &cpo
 set cpo&vim
 
-let g:trust#gpg#never = -5
-let g:trust#gpg#revoked = -4
-let g:trust#gpg#expired = -3
-let g:trust#gpg#err = -2
-let g:trust#gpg#unknown = -1
-let g:trust#gpg#undefined = 0
-let g:trust#gpg#marginal = 1
-let g:trust#gpg#full = 2
-let g:trust#gpg#ultimate = 3
+let g:trust#gpg#revoked = -2
+let g:trust#gpg#err = -1
+let g:trust#gpg#unknown = 0
+let g:trust#gpg#expired = 1
+let g:trust#gpg#undefined = 2
+let g:trust#gpg#never = 3
+let g:trust#gpg#marginal = 4
+let g:trust#gpg#full = 5
+let g:trust#gpg#ultimate = 6
 
 lockvar
-  \ g:trust#gpg#never
   \ g:trust#gpg#revoked
-  \ g:trust#gpg#expired
   \ g:trust#gpg#err
   \ g:trust#gpg#unknown
+  \ g:trust#gpg#expired
   \ g:trust#gpg#undefined
+  \ g:trust#gpg#never
   \ g:trust#gpg#marginal
   \ g:trust#gpg#full
   \ g:trust#gpg#ultimate
 
 let s:validities = {
-  \'NEVER': g:trust#gpg#never,
-  \'N': g:trust#gpg#never,
   \'REVOKED': g:trust#gpg#revoked,
   \'R': g:trust#gpg#revoked,
-  \'EXPIRED': g:trust#gpg#expired,
-  \'E': g:trust#gpg#expired,
   \'ERR': g:trust#gpg#err,
   \'?': g:trust#gpg#err,
   \'UNKNOWN': g:trust#gpg#unknown,
   \'-': g:trust#gpg#unknown,
+  \'EXPIRED': g:trust#gpg#expired,
+  \'E': g:trust#gpg#expired,
   \'UNDEFINED': g:trust#gpg#undefined,
   \'UNDEF': g:trust#gpg#undefined,
   \'Q': g:trust#gpg#undefined,
+  \'NEVER': g:trust#gpg#never,
+  \'N': g:trust#gpg#never,
   \'MARGINAL': g:trust#gpg#marginal,
   \'M': g:trust#gpg#marginal,
   \'FULL': g:trust#gpg#full,
