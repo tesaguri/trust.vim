@@ -124,7 +124,7 @@ function s:suite.no_pubkey()
   call s:SystemList('gpg --batch --delete-keys '.s:fingerprint)
   call s:assert.equals(
     \s:Promise.wait(trust#git#verify_commit($GIT_WORK_TREE)),
-    \[v:null, 1],
+    \[-1, v:null],
     \)
 endfunction
 

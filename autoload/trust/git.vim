@@ -66,7 +66,10 @@ function! s:IsDirtyStatusLine(line) abort
 endfunction
 
 function! s:ParseValidity(line) abort
-  let l:match = matchlist(a:line, '^\[GNUPG:\] \%(TRUST_\([^ ]*\)\|\%(\(E\)XP\|\(R\)EV\)KEYSIG\>\)')
+  let l:match = matchlist(
+    \a:line,
+    \'^\[GNUPG:\] \%(TRUST_\([^ ]*\)\|\(EXP\|REV\)KEYSIG\|\(ERRSIG\)\>\)'
+    \)
   if !empty(l:match)
     if !empty(l:match[1])
       try
@@ -77,12 +80,15 @@ function! s:ParseValidity(line) abort
         echohl None
       endtry
     elseif !empty(l:match[2])
-      return trust#gpg#validity('EXPIRED')
+      if l:match[2] == 'EXP'
+        return trust#gpg#validity('EXPIRED')
+      elseif l:match[2] == 'REV'
+        return trust#gpg#validity('REVOKED')
+      endif
     elseif !empty(l:match[3])
-      return trust#gpg#validity('REVOKED')
-    else
-      throw 'trust#git:UNREACHABLE: Reached unreachable code'
+      return trust#gpg#validity('ERR')
     endif
+    throw 'trust#git:UNREACHABLE: Reached unreachable code'
   endif
   return v:null
 endfunction
