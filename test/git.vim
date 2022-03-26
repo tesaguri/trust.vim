@@ -70,13 +70,24 @@ function s:suite.before_each()
 
   let $GIT_DIR = s:Filepath.join($GIT_WORK_TREE, '.git')
 
+  let l:gitconfig = s:Filepath.join($GIT_WORK_TREE, 'gitconfig')
+  let $GIT_CONFIG_GLOBAL = l:gitconfig
+  let $GIT_CONFIG_SYSTEM = l:gitconfig
+
   call s:SystemList('git init')
+  call s:SystemList('git config --local user.name test')
+  call s:SystemList('git config --local user.email test@example.invalid')
   call s:SystemList('git config --local user.signingKey '.s:fingerprint)
 endfunction
 
 function s:suite.after_each()
   call s:SetOtrust(g:trust#gpg#ultimate)
-  call s:UnletEnv('GIT_WORK_TREE', 'GIT_DIR')
+  call s:UnletEnv(
+    \'GIT_WORK_TREE',
+    \'GIT_DIR',
+    \'GIT_CONFIG_GLOBAL',
+    \'GIT_CONFIG_GLOBAL',
+    \)
 endfunction
 
 function s:suite.after()
