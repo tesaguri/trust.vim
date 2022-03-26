@@ -1,6 +1,17 @@
 let s:save_cpo = &cpo
 set cpo&vim
 
+unlockvar
+  \ g:trust#gpg#revoked
+  \ g:trust#gpg#err
+  \ g:trust#gpg#unknown
+  \ g:trust#gpg#expired
+  \ g:trust#gpg#undefined
+  \ g:trust#gpg#never
+  \ g:trust#gpg#marginal
+  \ g:trust#gpg#full
+  \ g:trust#gpg#ultimate
+
 let g:trust#gpg#revoked = -2
 let g:trust#gpg#err = -1
 let g:trust#gpg#unknown = 0
