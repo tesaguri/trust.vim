@@ -126,9 +126,9 @@ function! trust#git#verify_commit(path) abort
 
   let l:promise = s:Promise.new({Resolve, Reject -> s:Job.start(l:cmd, {
     \'on_stderr': funcref('s:on_stderr'),
-    \'on_exit': {status -> status
-      \ ? Reject(status)
-      \ : (l:validity is# v:null ? Reject(-1) : Resolve(l:validity))},
+    \'on_exit': {status -> l:validity is# v:null
+      \ ? Reject(status ? status : -1)
+      \ : Resolve(l:validity)},
     \})})
   return l:promise
 endfunction
