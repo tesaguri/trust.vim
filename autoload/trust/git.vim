@@ -149,13 +149,13 @@ function! s:is_dirty(path, dict) abort
     \'--porcelain=v2',
     \]
 
-  call add(l:cmd, a:allow_untracked
+  call add(l:cmd, l:allow_untracked
     \? '--untracked-files=no'
     \: '--untracked-files=normal')
-  call add(l:cmd, a:allow_dirty_submodule
+  call add(l:cmd, l:allow_dirty_submodule
     \? '--ignore-submodules=all'
     \: '--ignore-submodules=none')
-  call add(l:cmd,  a:allow_ignored
+  call add(l:cmd, l:allow_ignored
     \? '--ignored=no'
     \: '--ignored=matching')
 
@@ -178,7 +178,7 @@ function! s:is_dirty(path, dict) abort
   let l:promise = s:Promise.new({Resolve, Reject -> s:Job.start(l:cmd, {
     \'on_stdout': funcref('s:on_stdout'),
     \'on_exit': {status -> status
-      \ ? Reject(a:status)
+      \ ? Reject(status)
       \ : Resolve(s:Boolean(
         \l:is_dirty || (!empty(l:buf) && s:IsDirtyStatusLine(l:buf))))
       \},
