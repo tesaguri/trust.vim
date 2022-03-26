@@ -39,6 +39,7 @@ let s:validities = {
   \'MARGINAL': g:trust#gpg#marginal,
   \'M': g:trust#gpg#marginal,
   \'FULL': g:trust#gpg#full,
+  \'FULLY': g:trust#gpg#full,
   \'F': g:trust#gpg#full,
   \'ULTIMATE': g:trust#gpg#ultimate,
   \'U': g:trust#gpg#ultimate,
