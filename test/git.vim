@@ -3,7 +3,7 @@ let s:Promise = vital#trust#import('Async.Promise')
 
 let s:testdir = expand('<sfile>:h')
 
-let s:suite = themis#suite('gpg')
+let s:suite = themis#suite(expand('<sfile>:t:r'))
 let s:assert = themis#helper('assert')
 
 let s:tempnames = []

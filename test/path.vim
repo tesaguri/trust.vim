@@ -1,4 +1,4 @@
-let s:suite = themis#suite('path')
+let s:suite = themis#suite(expand('<sfile>:t:r'))
 let s:assert = themis#helper('assert')
 
 let s:Filepath = vital#trust#import('System.Filepath')
