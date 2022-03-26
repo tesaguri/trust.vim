@@ -98,22 +98,12 @@ end
 
 -- Metatable definitions:
 
----@private
-local index = {}
+mt.__index = {}
+
+mt.__index.safe_servers = setmetatable({}, safe_servers_mt)
 
 ---@private
-function mt.__index(_, key)
-  local handler = index[key]
-  return handler and handler()
-end
-
----@private
-index.safe_servers = function()
-  return setmetatable({}, safe_servers_mt)
-end
-
----@private
-index.last_root_dir = function()
+mt.__index.last_root_dir = function()
   return last_root_dir
 end
 
