@@ -5,10 +5,10 @@ THEMIS_PATH ?= vim-themis/bin/themis
 test: test-nvim test-vim
 
 test-nvim:
-	THEMIS_ARGS='-e -s --headless -V1' THEMIS_VIM=$(NVIM_PATH) $(THEMIS_PATH)
+	THEMIS_ARGS='-e -s --headless' THEMIS_VIM=$(NVIM_PATH) $(THEMIS_PATH)
 
 test-vim:
-	THEMIS_ARGS='-e -s -V1' THEMIS_VIM=$(VIM_PATH) $(THEMIS_PATH)
+	THEMIS_VIM=$(VIM_PATH) $(THEMIS_PATH)
 
 lint: format selene vint
 

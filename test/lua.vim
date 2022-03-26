@@ -1,11 +1,12 @@
 let s:Filepath = vital#trust#import('System.Filepath')
 
 if exists(':lua') is# 2
-  lua <<EOF
+  verbose lua <<EOF
   print(_VERSION)
   if jit then
     print(jit.version)
   end
+  print()
 EOF
 endif
 

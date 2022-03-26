@@ -1,4 +1,4 @@
-let s:suite = themis#suite('trust')
+let s:suite = themis#suite('path')
 let s:assert = themis#helper('assert')
 
 let s:Filepath = vital#trust#import('System.Filepath')

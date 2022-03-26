@@ -1,0 +1,14 @@
+#!/bin/sh
+
+# This script is used by the `badsig` test in `test/git.vim`.
+
+PATH="$(echo "$PATH" | sed -E 's/(^|[:;])[^:;]*badsig-bin[:;]/\1/')"
+export PATH
+
+exec gpg "$@" <<EOS
+tree 0000000000000000000000000000000000000000
+author trust.vim <test@example.invalid> 0 +0000
+committer trust.vim <test@example.invalid> 0 +0000
+
+test
+EOS
