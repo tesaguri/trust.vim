@@ -28,8 +28,6 @@ local function from_vim(value)
   return value
 end
 
----@private
-local allow = vim.funcref("trust#allow")
 --- Marks a path as trusted.
 ---
 --- Workspaces at the path or its descendants (up to a path explicitly marked as
@@ -40,11 +38,9 @@ local allow = vim.funcref("trust#allow")
 --- function is called.
 function path.allow(path)
   validate { path = { path, "string" } }
-  return from_vim(allow(path))
+  return from_vim(vim.call("trust#path#allow", path))
 end
 
----@private
-local deny = vim.funcref("trust#deny")
 --- Marks a path as distrusted.
 ---
 --- Workspaces at the path or its descendants (up to a path explicitly marked as
@@ -55,11 +51,9 @@ local deny = vim.funcref("trust#deny")
 --- function is called.
 function path.deny(path)
   validate { path = { path, "string" } }
-  return from_vim(deny(path))
+  return from_vim(vim.call("trust#path#deny", path))
 end
 
----@private
-local set = vim.funcref("trust#set")
 --- Sets the raw trust status of a path.
 ---
 ---@param path string The path to set trust status.
@@ -69,11 +63,9 @@ local set = vim.funcref("trust#set")
 --- function is called.
 function path.set(path, status)
   validate { path = { path, "string" }, status = { status, "boolean", true } }
-  return from_vim(set(path, status))
+  return from_vim(vim.call("trust#path#set", path, status))
 end
 
----@private
-local remove = vim.funcref("trust#remove")
 --- Removes the marker of (dis)trust of a path if it has been marked with
 --- |trust.allow()| or |trust.deny()|.
 ---
@@ -82,17 +74,12 @@ local remove = vim.funcref("trust#remove")
 --- function is called.
 function path.remove(path)
   validate { path = { path, "string" } }
-  return from_vim(remove(path))
+  return from_vim(vim.call("trust#path#remove", path))
 end
 
--- XXX: When a function with no arguments and a top-level variable have a same
--- name, Doxygen takes the function to be a variable. Therefore giving the
--- funcref a different name.
----@private
-local f = vim.funcref("trust#clear")
 --- Clears the status of (dis)trust of all paths.
 function path.clear()
-  f()
+  vim.call("trust#path#clear")
 end
 
 ---@private
@@ -109,8 +96,6 @@ local function validate_base_path(base_path)
   end
 end
 
----@private
-local load = vim.funcref("trust#load")
 --- Loads trust statuses from files.
 ---
 --- Overwrites the on-memory trust statuses.
@@ -121,11 +106,9 @@ local load = vim.funcref("trust#load")
 --- Defaults to `stdpath("data")."/trust"` (requires Neovim).
 function path.load(base_path)
   validate_base_path(base_path)
-  load(base_path)
+  vim.call("trust#path#load", base_path)
 end
 
----@private
-local save = vim.funcref("trust#save")
 --- Saves the on-memory trust statuses into files.
 ---
 ---@param base_path string|table|nil String of the path to a directory to save the
@@ -134,22 +117,18 @@ local save = vim.funcref("trust#save")
 --- Defaults to `stdpath("data")."/trust"` (requires Neovim).
 function path.save(base_path)
   validate_base_path(base_path)
-  save(base_path)
+  vim.call("trust#path#save", base_path)
 end
 
----@private
-local is_allowed = vim.funcref("trust#is_allowed")
 --- Returns `true` if the path is trusted.
 ---
 ---@param path string Path to a workspace.
 ---@return boolean `true` if the path is trusted, `false` otherwise.
 function path.is_allowed(path)
   validate { path = { path, "string" } }
-  return is_allowed(path)
+  return vim.call("trust#path#is_allowed", path)
 end
 
----@private
-local get = vim.funcref("trust#get")
 --- Returns the raw trust status of a path.
 ---
 --- Unlike |trust.is_allowed()|, this does not respect the trust status of
@@ -159,11 +138,9 @@ local get = vim.funcref("trust#get")
 --- `false` if marked as distrusted, `nil` otherwise.
 function path.get(path)
   validate { path = { path, "string" } }
-  return from_vim(get(path))
+  return from_vim(vim.call("trust#path#get", path))
 end
 
----@private
-local f = vim.funcref("trust#workspaces")
 --- Returns the list of (dis)trusted workspaces as an array of arrays, whose
 --- first element is a list of trusted workspaces and the second is a list of
 --- distrusted workspaces.
@@ -173,7 +150,7 @@ local f = vim.funcref("trust#workspaces")
 ---
 ---@return table List of (dis)trusted paths.
 function path.workspaces()
-  return f()
+  return vim.call("trust#path#workspaces")
 end
 
 return path

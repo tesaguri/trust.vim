@@ -17,16 +17,12 @@ gpg.marginal = marginal
 gpg.full = full
 gpg.ultimate = ultimate
 
----@private
-local validity = vim.funcref("trust#gpg#validity")
 function gpg.validity(value)
-  return validity(value)
+  return vim.call("trust#gpg#validity", value)
 end
 
----@private
-local f = vim.funcref("trust#gpg#min_validity")
 function gpg.min_validity()
-  return f()
+  return vim.call("trust#gpg#min_validity")
 end
 
 return gpg

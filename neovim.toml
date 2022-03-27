@@ -1,6 +1,16 @@
 [selene]
 base = "lua51"
 
+[vim.call]
+any = true
+
+[[vim.call.args]]
+type = "string"
+
+[[vim.call.args]]
+type = "..."
+required = false
+
 [[vim.fn."*".args]]
 type = "..."
 required = false

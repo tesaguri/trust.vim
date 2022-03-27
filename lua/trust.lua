@@ -23,15 +23,13 @@ else
   end
 end
 
----@private
-local is_allowed = vim.funcref("trust#is_allowed")
 --- Returns `true` if the path is trusted.
 ---
 ---@param path string Path to a workspace.
 ---@return boolean `true` if the path is trusted, `false` otherwise.
 function trust.is_allowed(path)
   validate { path = { path, "string" } }
-  return is_allowed(path)
+  return vim.call("trust#is_allowed", path)
 end
 
 return trust
