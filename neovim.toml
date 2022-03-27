@@ -16,6 +16,9 @@ type = "string"
 [[vim.dict.args]]
 type = "table"
 
+[[vim.eval.args]]
+type = "string"
+
 # Neovim-specific globals:
 
 [vim.NIL]

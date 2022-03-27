@@ -2,7 +2,16 @@ local M = {}
 
 local inspect = vim.inspect or tostring
 
-if vim.eval("has('win32')") ~= 0 then
+local has_win32
+if vim.eval then
+  -- Vim 8.1 doesn't have `vim.funcref`.
+  -- (it's documented but was not implemented then)
+  has_win32 = vim.eval("has('win32')") ~= 0
+else
+  has_win32 = vim.funcref("has")("win32") ~= 0
+end
+
+if has_win32 then
   M.root = "C:\\"
   function M.path(comps)
     return table.concat(comps, "\\")
