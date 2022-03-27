@@ -249,44 +249,88 @@ workspaces()                                         *trust.path.workspaces()*
 Lua module: trust.git                                          *lua-trust.git*
 
 is_allowed({path})                                    *trust.git.is_allowed()*
-                TODO: Documentation
+                Returns `true` if `HEAD` of the Git work tree at `path` is
+                signed and the work tree is clean.
 
 is_dirty({path}, {...})                                 *trust.git.is_dirty()*
-                TODO: Documentation
+                Returns a |Vital.Async.Promise| that resolves to `true` if the
+                Git work tree at `path` is dirty.
 
 verify_commit({path})                              *trust.git.verify_commit()*
-                TODO: Documentation
+                Returns a |Vital.Async.Promise| that resolves to a value
+                representing the validity of the signature of `HEAD` of the
+                Git work tree at `path`.
 
 
 ==============================================================================
 Lua module: trust.gpg                                          *lua-trust.gpg*
 
+err                                                            *trust.gpg.err*
+                Indicates the validity value of `err`.
+
 expired                                                    *trust.gpg.expired*
-                TODO: Documentation
+                Indicates the validity value of `expired`.
 
 full                                                          *trust.gpg.full*
-                TODO: Documentation
+                Indicates the validity value of `full`.
 
 marginal                                                  *trust.gpg.marginal*
-                TODO: Documentation
+                Indicates the validity value of `marginal`.
 
 min_validity()                                      *trust.gpg.min_validity()*
-                TODO: Documentation
+                Returns `gpg.validity(vim.g["trust#gpg#min_validity"])` or
+                |gpg.marginal| if `g:trust#gpg#min_validity` is unset.
+
+                This can be used by trust sources as a threshold to determine
+                if a signature is considered trustworthy.
 
 never                                                        *trust.gpg.never*
-                TODO: Documentation
+                Indicates the validity value of `never`.
+
+revoked                                                    *trust.gpg.revoked*
+                Indicates the validity value of `revoked`.
 
 ultimate                                                  *trust.gpg.ultimate*
-                TODO: Documentation
+                Indicates the validity value of `ultimate`.
 
 undefined                                                *trust.gpg.undefined*
-                TODO: Documentation
+                Indicates the validity value of `undefined`.
 
 unknown                                                    *trust.gpg.unknown*
-                TODO: Documentation
+                Indicates the validity value of `unknown`.
 
 validity({value})                                       *trust.gpg.validity()*
-                TODO: Documentation
+                Converts a validity value representation to a number
+                representation.
+
+                When a number is passed, returns it as-is if it is one of the
+                numbers listed in "Return" section below, or throws an
+                exception otherwise.
+
+                Regarding the ordering of the returned value, it is guaranteed
+                that `ultimate > full > marginal` holds and `marginal`
+                compares greater than other validity values, but any other
+                comparison is unspecified and is subject to change at any
+                time.
+
+                Parameters: ~
+                    {value}  string|number If `string` , one of (case-insensitive):
+                             • `-` or `unknown`
+                             • `e` or `expired`
+                             • `q` or `undefined`
+                             • `n` or `never`
+                             • `m` or `marginal`
+                             • `f` or `full`
+                             • `u` or `ultimate`
+                             • `r` or `revoked`
+                             • `?` or `err`
+
+                See also the man page for `gpg(1)` .
+
+                Return: ~
+                    number One of |gpg.unknown|, |gpg.expired|,
+                    |gpg.undefined|, |gpg.never|, |gpg.marginal|, |gpg.full|,
+                    |gpg.ultimate|, |gpg.revoked| or |gpg.err|.
 
 
 ==============================================================================
