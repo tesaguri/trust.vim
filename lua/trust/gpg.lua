@@ -1,18 +1,22 @@
 ---@private
 local gpg = {}
 
-local never = -3
-local expired = -2
-local unknown = -1
-local undefined = 0
-local marginal = 1
-local full = 2
-local ultimate = 3
+local revoked = vim.call("trust#gpg#validity", "REVOKED")
+local err = vim.call("trust#gpg#validity", "ERR")
+local unknown = vim.call("trust#gpg#validity", "UNKNOWN")
+local expired = vim.call("trust#gpg#validity", "EXPIRED")
+local undefined = vim.call("trust#gpg#validity", "UNDEFINED")
+local never = vim.call("trust#gpg#validity", "NEVER")
+local marginal = vim.call("trust#gpg#validity", "MARGINAL")
+local full = vim.call("trust#gpg#validity", "FULL")
+local ultimate = vim.call("trust#gpg#validity", "ULTIMATE")
 
-gpg.never = never
-gpg.expired = expired
+gpg.revoked = revoked
+gpg.err = err
 gpg.unknown = unknown
+gpg.expired = expired
 gpg.undefined = undefined
+gpg.never = never
 gpg.marginal = marginal
 gpg.full = full
 gpg.ultimate = ultimate
