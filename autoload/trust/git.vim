@@ -80,9 +80,9 @@ function! s:ParseValidity(line) abort
         echohl None
       endtry
     elseif !empty(l:match[2])
-      if l:match[2] == 'EXP'
+      if l:match[2] is# 'EXP'
         return trust#gpg#validity('EXPIRED')
-      elseif l:match[2] == 'REV'
+      elseif l:match[2] is# 'REV'
         return trust#gpg#validity('REVOKED')
       endif
     elseif !empty(l:match[3])
