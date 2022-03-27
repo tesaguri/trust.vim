@@ -1,5 +1,7 @@
 let s:Filepath = vital#trust#import('System.Filepath')
 
+execute 'set runtimepath^='.expand('<sfile>:h')
+
 if exists('*luaeval')
   verbose lua <<EOF
   print(_VERSION)
@@ -8,9 +10,29 @@ if exists('*luaeval')
   end
   print()
 EOF
+  " Lua interface of Vim 8.1 and prior does not load modules from runtimepath
+  " automatically.
+  if luaeval('not pcall(function() require("testutil") end)')
+    " Not using `Vital.System.Filepath` because we are going to pass the path to
+    " Lua, which does not respect `&shellslash`.
+    if has('win32')
+      function s:Path(...)
+        return join(a:000, '\')
+      endfunction
+    else
+      function s:Path(...)
+        return join(a:000, '/')
+      endfunction
+    endif
+    call luaeval(
+      \'(function() package.path = _A .. ";" .. package.path end)()',
+      \join(map(split(&runtimepath, ','), {_, p ->
+        \s:Path(p, 'lua', '?.lua').';'.s:Path(p, 'lua', '?', 'init.lua')
+        \},
+      \), ';'),
+      \)
+  endif
 endif
-
-execute 'set runtimepath^='.expand('<sfile>:h')
 
 for s:chunk in glob(s:Filepath.join(expand('<sfile>:h'), '*.lua'), 1, 1)
   let s:suite = themis#suite(fnamemodify(s:chunk, ':t:r'))

@@ -1,9 +1,8 @@
 local M = {}
 
-local has = vim.funcref("has")
 local inspect = vim.inspect or tostring
 
-if has("win32") ~= 0 then
+if vim.eval("has('win32')") ~= 0 then
   M.root = "C:\\"
   function M.path(comps)
     return table.concat(comps, "\\")
