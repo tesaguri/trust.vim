@@ -1,7 +1,5 @@
----@private
 local path = {}
 
----@private
 local validate
 if vim.validate then
   validate = vim.validate

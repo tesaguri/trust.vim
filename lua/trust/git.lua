@@ -1,4 +1,3 @@
----@private
 local git = {}
 
 --- Returns `true` if `HEAD` of the Git work tree at `path` is signed and the

@@ -1,46 +1,16 @@
 -- Utilities for controlling Neovim's `vim.lsp` attach behavior based on the
 -- workspaces' trust statuses.
 
----@private
 local lsp = {}
----@private
 local mt = {}
 
----@private
 local trust = require("trust")
 
----@private
-local safe_servers_mt = {}
---- Handle of a set of servers that are run regardless of the workspace's trust
---- status.
----
---- This is not an ordinary dictionary and you can only inspect its content
---- through indexing.
----
---- Examples:
---- <pre>
---- local trust_lsp = require("trust.lsp")
----
---- -- Set an individual server:
---- trust_lsp.safe_servers.dhall_lsp_server = true
----
---- -- Set multiple servers at once:
---- trust_lsp.safe_servers = { "dhall_lsp_server" }
----
---- -- You cannot use `next` on it:
---- assert(next(trust_lsp.safe_servers) == nil)
---- -- But you can index it by the server name:
---- assert(trust_lsp.safe_servers.dhall_lsp_server == true)
---- -- or use the `safe_servers_pairs()` iterator function:
---- assert(trust_lsp.safe_servers_pairs()() == "dhall_lsp_server")
---- </pre>
 local safe_servers = {}
+local safe_servers_mt = {}
 
---- The value of `root_dir` config key that were passed in the last call of the
---- hooked version of `vim.lsp.start_client`.
 local last_root_dir
 
----@private
 local hooked_start_client
 
 --- Overwrites `vim.lsp.start_client` to make it respect the workspace trust
@@ -100,14 +70,37 @@ end
 
 mt.__index = {}
 
+--- Handle of a set of servers that are run regardless of the workspace's trust
+--- status.
+---
+--- This is not an ordinary dictionary and you can only inspect its content
+--- through indexing.
+---
+--- Examples:
+--- <pre>
+--- local trust_lsp = require("trust.lsp")
+---
+--- -- Set an individual server:
+--- trust_lsp.safe_servers.dhall_lsp_server = true
+---
+--- -- Set multiple servers at once:
+--- trust_lsp.safe_servers = { "dhall_lsp_server" }
+---
+--- -- You cannot use `next` on it:
+--- assert(next(trust_lsp.safe_servers) == nil)
+--- -- But you can index it by the server name:
+--- assert(trust_lsp.safe_servers.dhall_lsp_server == true)
+--- -- or use the `safe_servers_pairs()` iterator function:
+--- assert(trust_lsp.safe_servers_pairs()() == "dhall_lsp_server")
+--- </pre>
 mt.__index.safe_servers = setmetatable({}, safe_servers_mt)
 
----@private
+--- The value of `root_dir` config key that were passed in the last call of the
+--- hooked version of `vim.lsp.start_client`.
 mt.__index.last_root_dir = function()
   return last_root_dir
 end
 
----@private
 local newindex = {}
 
 ---@private
@@ -116,7 +109,6 @@ function mt.__newindex(_, key, value)
   return handler and handler(value)
 end
 
----@private
 newindex.safe_servers = function(value)
   vim.validate {
     safe_servers = {
@@ -143,7 +135,6 @@ newindex.safe_servers = function(value)
   return true
 end
 
----@private
 newindex.last_root_dir = function()
   error("Refusing to set `last_root_dir` directly")
 end

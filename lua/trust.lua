@@ -5,7 +5,6 @@ for name, f in pairs(require("trust.path")) do
   trust[name] = f
 end
 
----@private
 local validate
 if vim.validate then
   validate = vim.validate

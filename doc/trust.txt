@@ -131,9 +131,6 @@ is_allowed({path})                                        *trust.is_allowed()*
                 Return: ~
                     boolean `true` if the path is trusted, `false` otherwise.
 
-trust                                                            *trust.trust*
-                TODO: Documentation
-
 
 ==============================================================================
 Lua module: trust.path                                        *lua-trust.path*

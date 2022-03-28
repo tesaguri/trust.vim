@@ -375,7 +375,24 @@ function TLua2DoX_filter.readfile(this,AppStamp,Filename)
   local outStream = TStream_Write()
   this.outStream = outStream -- save to this obj
 
-  if (inStream:getContents(Filename)) then
+  local contents = inStream:getContents(Filename)
+  if contents then
+    local module_name
+    local module_mt
+    local last_line = contents[table.maxn(contents)]
+    if last_line then
+      local expr = string_trim(last_line):match("^return%s+(.+)$")
+      if expr then
+        if expr:match("^[%w_]+$") then
+          module_name = expr
+        else
+          module_name, module_mt = expr:match(
+            "^setmetatable%(([%w_]+),%s*([%w_]+)%)"
+          )
+        end
+      end
+    end
+
     -- output the file
     local line
     local fn_magic -- function name/def from  magic comment
@@ -388,8 +405,7 @@ function TLua2DoX_filter.readfile(this,AppStamp,Filename)
     local state = ''  -- luacheck: ignore 231 variable is set but never accessed.
     local offset = 0
     while not (inStream:eof()) do
-      local line_verbatim = inStream:getLine()
-      line = string_trim(line_verbatim)
+      line = string_trim(inStream:getLine())
       --            TCore_Debug_show_var('inStream',inStream)
       --            TCore_Debug_show_var('line',line )
       if string.sub(line,1,2) == '--' then -- it's a comment
@@ -506,11 +522,17 @@ function TLua2DoX_filter.readfile(this,AppStamp,Filename)
         end
         fn_magic = nil -- mustn't indavertently use it again
       elseif
-        string.find(line_verbatim, "^[%w_]+%s*=")
-        or string.find(line_verbatim, "^local%s+[%w_]+")
+        (
+          module_name
+          and string.find(line, "^" .. module_name .. "%.[%w_]+%s*=")
+        )
+        or (
+          module_mt
+          and string.find(line, "^" .. module_mt .. "%.__index%.[%w_]+%s*=")
+        )
       then
-        local ident = string.match(line_verbatim, "([%w_]+)%s*=")
-          or string.match(line_verbatim, "local%s+([%w_]+)")
+        local ident = string.match(line, "^[%w_]+%.[%w_]+%.([%w_]+)")
+          or string.match(line, "^[%w_]+%.([%w_]+)")
         outStream:writeln(ident .. ";")
 
       -- TODO: If we can make this learn how to generate these, that would be helpful.

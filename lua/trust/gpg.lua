@@ -1,42 +1,31 @@
----@private
 local gpg = {}
 
 --- Indicates the validity value of `revoked`.
-local revoked = vim.call("trust#gpg#validity", "REVOKED")
+gpg.revoked = vim.call("trust#gpg#validity", "REVOKED")
 
 --- Indicates the validity value of `err`.
-local err = vim.call("trust#gpg#validity", "ERR")
+gpg.err = vim.call("trust#gpg#validity", "ERR")
 
 --- Indicates the validity value of `unknown`.
-local unknown = vim.call("trust#gpg#validity", "UNKNOWN")
+gpg.unknown = vim.call("trust#gpg#validity", "UNKNOWN")
 
 --- Indicates the validity value of `expired`.
-local expired = vim.call("trust#gpg#validity", "EXPIRED")
+gpg.expired = vim.call("trust#gpg#validity", "EXPIRED")
 
 --- Indicates the validity value of `undefined`.
-local undefined = vim.call("trust#gpg#validity", "UNDEFINED")
+gpg.undefined = vim.call("trust#gpg#validity", "UNDEFINED")
 
 --- Indicates the validity value of `never`.
-local never = vim.call("trust#gpg#validity", "NEVER")
+gpg.never = vim.call("trust#gpg#validity", "NEVER")
 
 --- Indicates the validity value of `marginal`.
-local marginal = vim.call("trust#gpg#validity", "MARGINAL")
+gpg.marginal = vim.call("trust#gpg#validity", "MARGINAL")
 
 --- Indicates the validity value of `full`.
-local full = vim.call("trust#gpg#validity", "FULL")
+gpg.full = vim.call("trust#gpg#validity", "FULL")
 
 --- Indicates the validity value of `ultimate`.
-local ultimate = vim.call("trust#gpg#validity", "ULTIMATE")
-
-gpg.revoked = revoked
-gpg.err = err
-gpg.unknown = unknown
-gpg.expired = expired
-gpg.undefined = undefined
-gpg.never = never
-gpg.marginal = marginal
-gpg.full = full
-gpg.ultimate = ultimate
+gpg.ultimate = vim.call("trust#gpg#validity", "ULTIMATE")
 
 --- Converts a validity value representation to a number representation.
 ---
