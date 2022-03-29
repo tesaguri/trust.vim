@@ -150,7 +150,6 @@ function! trust#path#save(...) abort
     throw 'Too many arguments for function: trust#save'
   endif
 
-
   let [l:allowfile, l:denyfile] = call('s:FilePaths', a:000)
 
   if a:0 is# 0

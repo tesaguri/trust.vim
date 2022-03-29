@@ -125,8 +125,7 @@ newindex.safe_servers = function(value)
         new[k] = true
       end
     else
-      assert(
-        false,
+      error(
         "safe_servers: expected dictionary `{ string = boolean }` or array of strings"
       )
     end

@@ -29,11 +29,7 @@ else
   let s:sep = '/'
 endif
 function! s:IsDescendant(path) abort
-  if a:path[:2] is# '..'.s:sep || a:path[:3] is# '"..'.s:sep
-    return 0
-  else
-    return 1
-  endif
+  return a:path[:2] isnot# '..'.s:sep && a:path[:3] isnot# '"..'.s:sep
 endfunction
 
 function! s:Boolean(value) abort
@@ -156,14 +152,14 @@ function! s:is_dirty(path, dict) abort
     \]
 
   call add(l:cmd, l:allow_untracked
-    \? '--untracked-files=no'
-    \: '--untracked-files=normal')
+    \ ? '--untracked-files=no'
+    \ : '--untracked-files=normal')
   call add(l:cmd, l:allow_dirty_submodule
-    \? '--ignore-submodules=all'
-    \: '--ignore-submodules=none')
+    \ ? '--ignore-submodules=all'
+    \ : '--ignore-submodules=none')
   call add(l:cmd, l:allow_ignored
-    \? '--ignored=no'
-    \: '--ignored=matching')
+    \ ? '--ignored=no'
+    \ : '--ignored=matching')
 
   let l:is_dirty = 0
 

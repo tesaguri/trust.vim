@@ -151,6 +151,7 @@ function s:suite.notgit()
   call s:UnletEnv('GIT_WORK_TREE', 'GIT_DIR')
   let l:path = tempname()
   call mkdir(l:path, 'p')
+  call add(s:tempnames, l:path)
   call s:assert.equals(
     \s:Promise.wait(trust#git#verify_commit(l:path)),
     \[v:null, 128],
