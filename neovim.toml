@@ -22,6 +22,7 @@ type = "string"
 
 [[vim.dict.args]]
 type = "table"
+required = false
 
 [[vim.eval.args]]
 type = "string"

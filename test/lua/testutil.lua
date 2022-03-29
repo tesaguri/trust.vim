@@ -1,5 +1,6 @@
 local M = {}
 
+local cmd = vim.cmd or vim.command
 local eval = vim.eval or vim.api.nvim_eval
 local inspect = vim.inspect or tostring
 
@@ -25,8 +26,23 @@ function M.assert_eq(lhs, rhs)
   end
 end
 
+function M.skip(message)
+  -- Use `vim.command` in case `vim.call` is unavailable. The behavior of the
+  -- exception is documented by Themis so it should be safe rely upon.
+  cmd(string.format([[throw 'themis: report: SKIP:'.%q]], message))
+end
+
 if vim.dict then
-  M.dict = vim.dict
+  function M.dict(t)
+    -- Vim 8.1 cannot convert functions. Ignore the error for now.
+    local status, d = pcall(vim.dict, t)
+    if status then
+      return d
+    else
+      print(d)
+      return vim.dict()
+    end
+  end
 elseif vim.type_idx then
   function M.dict(t)
     t[vim.type_idx] = vim.types.dictionary
