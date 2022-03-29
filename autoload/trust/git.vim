@@ -107,6 +107,13 @@ function! trust#git#is_allowed(path) abort
 endfunction
 
 function! trust#git#verify_commit(path) abort
+  if executable('git') isnot# 1
+    throw 'trust#git:GIT_NOT_FOUND: command not found: git'
+  endif
+  if executable('gpg') isnot# 1
+    throw 'trust#git:GPG_NOT_FOUND: command not found: gpg'
+  endif
+
   let l:cmd = ['git', '-C', a:path, 'verify-commit', '--raw', 'HEAD']
 
   let l:validity = v:null
@@ -136,6 +143,10 @@ function! trust#git#verify_commit(path) abort
 endfunction
 
 function! s:is_dirty(path, dict) abort
+  if executable('git') isnot# 1
+    throw 'trust#git:GIT_NOT_FOUND: command not found: git'
+  endif
+
   " vint: next-line -ProhibitUsingUndeclaredVariable
   let l:allow_untracked = get(a:dict, 'allow_untracked', s:allow_untracked())
   " vint: next-line -ProhibitUsingUndeclaredVariable

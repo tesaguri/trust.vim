@@ -5,6 +5,7 @@ let s:testdir = expand('<sfile>:h')
 
 let s:suite = themis#suite(expand('<sfile>:t:r'))
 let s:assert = themis#helper('assert')
+call themis#helper('command')
 
 let s:tempnames = []
 
@@ -173,4 +174,37 @@ function s:suite.dirtiness()
     \s:Promise.wait(trust#git#is_dirty($GIT_WORK_TREE)),
     \[v:true, v:null],
     \)
+endfunction
+
+function s:suite.shell_cmd_missing()
+  let l:bin = tempname()
+  call mkdir(l:bin, 'p')
+  call add(s:tempnames, l:bin)
+
+  let l:save_path = $PATH
+
+  let l:git = exepath('git')
+  " Make `l:bin` only contain `git` executable:
+  if executable('ln')
+    call s:SystemList('ln -s '.shellescape(l:git).' '.shellescape(l:bin))
+  else
+    " Fallback: copy the executable.
+    let l:dest = s:Filepath.join(l:bin, fnamemodify(l:git, ':t'))
+    if writefile(readfile(l:git, 'b'), l:dest)
+      throw '`writefile` failed'
+    endif
+    if !(setfperm(l:dest, 'rwxr-xr-x') || executable(l:dest))
+      throw '`setfperm` failed'
+    endif
+  endif
+
+  call s:UnletEnv('PATH')
+  Throws /^trust#git:GIT_NOT_FOUND\>/ trust#git#verify_commit($GIT_WORK_TREE)
+  Throws /^trust#git:GIT_NOT_FOUND\>/ trust#git#is_dirty($GIT_WORK_TREE)
+
+  let $PATH = l:bin
+  Throws /^trust#git:GPG_NOT_FOUND\>/ trust#git#verify_commit($GIT_WORK_TREE)
+  call trust#git#is_dirty($GIT_WORK_TREE) " Should not throw.
+
+  let $PATH = l:save_path
 endfunction
