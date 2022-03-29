@@ -15,9 +15,6 @@ required = false
 type = "..."
 required = false
 
-[[vim.funcref.args]]
-type = "string"
-
 # Vim-specific globals:
 
 [[vim.command.args]]
@@ -33,6 +30,9 @@ type = "string"
 
 [vim.NIL]
 property = true
+
+[[vim.api.nvim_eval.args]]
+type = "string"
 
 [[vim.cmd.args]]
 type = "string"

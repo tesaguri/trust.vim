@@ -10,8 +10,7 @@ if exists('*luaeval')
   end
   print()
 EOF
-  " Lua interface of Vim 8.1 and prior does not load modules from runtimepath
-  " automatically.
+  " Vim 8.1 and prior does not load Lua modules from runtimepath automatically.
   if luaeval('not pcall(function() require("testutil") end)')
     " Not using `Vital.System.Filepath` because we are going to pass the path to
     " Lua, which does not respect `&shellslash`.

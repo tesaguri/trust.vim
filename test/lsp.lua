@@ -4,7 +4,7 @@ local suite = {}
 
 if not vim.lsp then
   function suite._()
-    vim.funcref("themis#helper")("assert").skip("`vim.lsp` is not available")
+    vim.call("themis#helper", "assert").skip("`vim.lsp` is not available")
   end
   return util.dict(suite)
 end
