@@ -9,8 +9,6 @@ local trust = require("trust")
 local safe_servers = {}
 local safe_servers_mt = {}
 
-local last_root_dir
-
 local hooked_start_client
 
 --- Overwrites `vim.lsp.start_client` to make it respect the workspace trust
@@ -32,7 +30,7 @@ function lsp.hook_start_client()
     if not root_dir then
       return
     end
-    last_root_dir = root_dir
+    mt.__index.last_root_dir = root_dir
     if rawget(safe_servers, config.name) or trust.is_allowed(root_dir) then
       return old(config)
     end
@@ -97,9 +95,7 @@ mt.__index.safe_servers = setmetatable({}, safe_servers_mt)
 
 --- The value of `root_dir` config key that were passed in the last call of the
 --- hooked version of `vim.lsp.start_client`.
-mt.__index.last_root_dir = function()
-  return last_root_dir
-end
+mt.__index.last_root_dir = nil
 
 local newindex = {}
 
