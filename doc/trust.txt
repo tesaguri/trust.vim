@@ -245,18 +245,60 @@ workspaces()                                         *trust.path.workspaces()*
 ==============================================================================
 Lua module: trust.git                                          *lua-trust.git*
 
+async_is_allowed({path}, {callback})            *trust.git.async_is_allowed()*
+                Checks if `HEAD` of the Git work tree at `path` is signed with
+                a truested key and the worktree is clean, and asynchronously
+                calls the callback to notify the result.
+
+                Parameters: ~
+                    {path}      string A path to a directory under a Git work
+                                tree.
+                    {callback}  function A function to be called with `true`
+                                if the commit is signed and the work tree is
+                                clean, or `false` otherwise (including an
+                                error).
+
 is_allowed({path})                                    *trust.git.is_allowed()*
                 Returns `true` if `HEAD` of the Git work tree at `path` is
-                signed and the work tree is clean.
+                signed with a trusted key and the work tree is clean.
 
-is_dirty({path}, {...})                                 *trust.git.is_dirty()*
-                Returns a |Vital.Async.Promise| that resolves to `true` if the
-                Git work tree at `path` is dirty.
+                Parameters: ~
+                    {path}  string A path to a directory under a Git work
+                            tree.
 
-verify_commit({path})                              *trust.git.verify_commit()*
-                Returns a |Vital.Async.Promise| that resolves to a value
-                representing the validity of the signature of `HEAD` of the
-                Git work tree at `path`.
+                Return: ~
+                    boolean `true` if the commit is signed and the work tree
+                    is clean, or `false` otherwise (including an error).
+
+                                                        *trust.git.is_dirty()*
+{path}, {on_resolve}, {on_reject}, {...})is_dirty(,
+                Checks if the Git work tree at `path` is dirty and
+                asynchronously calls the callbacks to notify the result.
+
+                Parameters: ~
+                    {path}        string A path to a directory under a Git
+                                  work tree.
+                    {on_resolve}  function A function to be called with `true`
+                                  if the work tree is dirty or `false` if
+                                  dirty.
+                    {on_reject}   function A function to be called with the
+                                  status code returned by `git` command when
+                                  the check fails.
+
+                                                   *trust.git.verify_commit()*
+{path}, {on_resolve}, {on_reject})verify_commit(,
+                Checks the validity of the signature of `HEAD` of the Git work
+                tree at `path` and asynchronously calls the callbacks to
+                notify the result.
+
+                Parameters: ~
+                    {path}        string A path to a directory under a Git
+                                  work tree.
+                    {on_resolve}  function A function to be called with the
+                                  validity value of the signature.
+                    {on_reject}   function A function to be called with the
+                                  status code returned by `git` command when
+                                  the check fails.
 
 
 ==============================================================================

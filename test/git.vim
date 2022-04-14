@@ -105,12 +105,20 @@ function s:SetOtrust(otrust)
     \)
 endfunction
 
+function s:CallWait(f, ...)
+  let l:a = a:000
+  let l:promise = s:Promise.new(
+    \{Resolve, Reject -> call(a:f, l:a + [Resolve, Reject])},
+    \)
+  return s:Promise.wait(l:promise)
+endfunction
+
 function s:suite.validity()
   call s:SystemList('git commit -S -m test --allow-empty')
   for l:otrust in range(g:trust#gpg#undefined, g:trust#gpg#ultimate)
     call s:SetOtrust(l:otrust)
     call s:assert.equals(
-      \s:Promise.wait(trust#git#verify_commit($GIT_WORK_TREE)),
+      \s:CallWait('trust#git#verify_commit', $GIT_WORK_TREE),
       \[l:otrust, v:null],
       \)
   endfor
@@ -125,7 +133,7 @@ function s:suite.badsig()
   let $PATH = l:save_path
 
   call s:assert.equals(
-    \s:Promise.wait(trust#git#verify_commit($GIT_WORK_TREE)),
+    \s:CallWait('trust#git#verify_commit', $GIT_WORK_TREE),
     \[v:null, 1],
     \)
 endfunction
@@ -135,7 +143,7 @@ function s:suite.no_pubkey()
   call s:SystemList('gpg --batch --yes --delete-secret-keys '.s:fingerprint)
   call s:SystemList('gpg --batch --delete-keys '.s:fingerprint)
   call s:assert.equals(
-    \s:Promise.wait(trust#git#verify_commit($GIT_WORK_TREE)),
+    \s:CallWait('trust#git#verify_commit', $GIT_WORK_TREE),
     \[-1, v:null],
     \)
 endfunction
@@ -143,7 +151,7 @@ endfunction
 function s:suite.no_sig()
   call s:SystemList('git commit -m test --allow-empty')
   call s:assert.equals(
-    \s:Promise.wait(trust#git#verify_commit($GIT_WORK_TREE)),
+    \s:CallWait('trust#git#verify_commit', $GIT_WORK_TREE),
     \[v:null, 1],
     \)
 endfunction
@@ -154,11 +162,11 @@ function s:suite.notgit()
   call mkdir(l:path, 'p')
   call add(s:tempnames, l:path)
   call s:assert.equals(
-    \s:Promise.wait(trust#git#verify_commit(l:path)),
+    \s:CallWait('trust#git#verify_commit', l:path),
     \[v:null, 128],
     \)
   call s:assert.equals(
-    \s:Promise.wait(trust#git#is_dirty(l:path)),
+    \s:CallWait('trust#git#is_dirty', l:path),
     \[v:null, 128],
     \)
 endfunction
@@ -166,12 +174,12 @@ endfunction
 function s:suite.dirtiness()
   call s:SystemList('git commit -m test --allow-empty')
   call s:assert.equals(
-    \s:Promise.wait(trust#git#is_dirty($GIT_WORK_TREE)),
+    \s:CallWait('trust#git#is_dirty', $GIT_WORK_TREE),
     \[v:false, v:null],
     \)
   call writefile([], s:Filepath.join($GIT_WORK_TREE, 'test'))
   call s:assert.equals(
-    \s:Promise.wait(trust#git#is_dirty($GIT_WORK_TREE)),
+    \s:CallWait('trust#git#is_dirty', $GIT_WORK_TREE),
     \[v:true, v:null],
     \)
 endfunction
@@ -199,12 +207,15 @@ function s:suite.shell_cmd_missing()
   endif
 
   call s:UnletEnv('PATH')
-  Throws /^trust#git:GIT_NOT_FOUND\>/ trust#git#verify_commit($GIT_WORK_TREE)
-  Throws /^trust#git:GIT_NOT_FOUND\>/ trust#git#is_dirty($GIT_WORK_TREE)
+  Throws /^trust#git:GIT_NOT_FOUND\>/
+    \ trust#git#verify_commit($GIT_WORK_TREE, {-> 0}, {-> 0})
+  Throws /^trust#git:GIT_NOT_FOUND\>/
+    \ trust#git#is_dirty($GIT_WORK_TREE, {-> 0}, {-> 0})
 
   let $PATH = l:bin
-  Throws /^trust#git:GPG_NOT_FOUND\>/ trust#git#verify_commit($GIT_WORK_TREE)
-  call trust#git#is_dirty($GIT_WORK_TREE) " Should not throw.
+  Throws /^trust#git:GPG_NOT_FOUND\>/
+    \ trust#git#verify_commit($GIT_WORK_TREE, {-> 0}, {-> 0})
+  call trust#git#is_dirty($GIT_WORK_TREE, {-> 0}, {-> 0}) " Should not throw.
 
   let $PATH = l:save_path
 endfunction

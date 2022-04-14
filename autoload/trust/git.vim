@@ -1,7 +1,6 @@
 let s:save_cpo = &cpo
 set cpo&vim
 
-let s:Promise = vital#trust#import('Async.Promise')
 let s:Job = vital#trust#import('System.Job')
 
 function! s:DefGlobalGetter(name, default) abort
@@ -90,23 +89,68 @@ function! s:ParseValidity(line) abort
 endfunction
 
 function! trust#git#is_allowed(path) abort
-  let l:promise = trust#git#verify_commit(a:path)
-    \.catch({-> trust#gpg#validity('ERR')})
-    \.then({validity -> validity >=# trust#gpg#min_validity()
-      \ ? 0
-      \ : Promise.reject(1)
-      \})
-  " vint: next-line -ProhibitUsingUndeclaredVariable
-  if !s:allow_dirty()
-    let l:dirty = trust#git#is_dirty(a:path)
-      \.then({status -> status ? s:Promise.reject(1) : 0})
-    let l:promise = Promise.all([l:promise, l:dirty])
+  if !exists('s:Promise')
+    let s:Promise = vital#trust#import('Async.Promise')
   endif
-  let [_, l:err] = s:Promise.wait(l:promise)
-  return l:err is# v:null
+  let l:promise = s:Promise.new(
+    \{Resolve -> trust#git#async_is_allowed(a:path, {value -> Resolve(value)})}
+    \)
+  return s:Promise.wait(l:promise)[0]
 endfunction
 
-function! trust#git#verify_commit(path) abort
+function! trust#git#async_is_allowed(path, callback) abort
+  let l:resolved = 0
+  let l:rejected = 0
+
+  function! s:resolve() abort closure
+    if l:resolved
+      call a:callback(1)
+    else
+      let l:resolved += 1
+    endif
+  endfunction
+
+  function! s:reject() abort closure
+    if !l:rejected
+      call a:callback(0)
+      let l:rejected = 1
+    endif
+  endfunction
+
+  function! s:reject_verify_commit() closure
+    if exists('l:dirty')
+      call l:dirty.stop()
+    endif
+    call s:reject()
+  endfunction
+  let l:verify_commit = s:verify_commit(
+    \a:path,
+    \{validity -> validity >=# trust#gpg#min_validity()
+      \ ? s:resolve()
+      \ : s:reject_verify_commit()
+      \},
+    \{-> trust#gpg#validity('ERR') >=# trust#gpg#min_validity()
+      \ ? s:resolve()
+      \ : s:reject_verify_commit()
+      \},
+    \)
+  " vint: next-line -ProhibitUsingUndeclaredVariable
+  if s:allow_dirty()
+    call s:resolve()
+  else
+    function! s:reject_is_dirty() closure
+      call l:verify_commit.stop()
+      call s:reject()
+    endfunction
+    let l:dirty = s:is_dirty(
+      \a:path,
+      \{value -> value ? s:reject_is_dirty() : s:resolve()},
+      \{-> s:reject_is_dirty()},
+      \)
+  endif
+endfunction
+
+function! s:verify_commit(path, on_resolve, on_reject) abort
   if executable('git') isnot# 1
     throw 'trust#git:GIT_NOT_FOUND: command not found: git'
   endif
@@ -133,16 +177,21 @@ function! trust#git#verify_commit(path) abort
     endfor
   endfunction
 
-  let l:promise = s:Promise.new({Resolve, Reject -> s:Job.start(l:cmd, {
+  return s:Job.start(l:cmd, {
     \'on_stderr': funcref('s:on_stderr'),
     \'on_exit': {status -> l:validity is# v:null
-      \ ? Reject(status ? status : -1)
-      \ : Resolve(l:validity)},
-    \})})
-  return l:promise
+      \ ? a:on_reject(status ? status : -1)
+      \ : a:on_resolve(l:validity)
+      \},
+    \})
 endfunction
 
-function! s:is_dirty(path, dict) abort
+function! trust#git#verify_commit(path, on_resolve, on_reject) abort
+  " Drop the return value as it is not meant to be in the public API.
+  call s:verify_commit(a:path, a:on_resolve, a:on_reject)
+endfunction
+
+function! s:is_dirty(path, on_resolve, on_reject, dict) abort
   if executable('git') isnot# 1
     throw 'trust#git:GIT_NOT_FOUND: command not found: git'
   endif
@@ -188,23 +237,24 @@ function! s:is_dirty(path, dict) abort
     endif
   endfunction
 
-  let l:promise = s:Promise.new({Resolve, Reject -> s:Job.start(l:cmd, {
+  return s:Job.start(l:cmd, {
     \'on_stdout': funcref('s:on_stdout'),
     \'on_exit': {status -> status
-      \ ? Reject(status)
-      \ : Resolve(s:Boolean(
-        \l:is_dirty || (!empty(l:buf) && s:IsDirtyStatusLine(l:buf))))
+      \ ? a:on_reject(status)
+      \ : a:on_resolve(
+        \s:Boolean(
+          \l:is_dirty || (!empty(l:buf) && s:IsDirtyStatusLine(l:buf))
+          \),
+        \)
       \},
-    \})})
-
-  return l:promise
+    \})
 endfunction
 
-function! trust#git#is_dirty(path, ...) abort
+function! trust#git#is_dirty(path, on_resolve, on_reject, ...) abort
   if a:0
-    return call('s:is_dirty', [a:path] + a:000)
+    call call('s:is_dirty', [a:path, a:on_resolve, a:on_reject] + a:000)
   else
-    return call('s:is_dirty', [a:path, {}])
+    call call('s:is_dirty', [a:path, a:on_resolve, a:on_reject, {}])
   endif
 endfunction
 
